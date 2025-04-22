@@ -1,0 +1,27 @@
+.header {
+  @apply bg-secondary text-white shadow-lg;
+
+  .container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4;
+  }
+
+  .header-content {
+    @apply flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0;
+  }
+
+  .logo-container {
+    @apply flex items-center;
+  }
+
+  .title {
+    @apply text-xl sm:text-2xl font-bold;
+  }
+
+  .user-info {
+    @apply flex flex-col sm:flex-row items-center gap-4 sm:gap-6;
+  }
+
+  .user-details {
+    @apply text-sm text-center sm:text-left;
+  }
+}

@@ -1,0 +1,16 @@
+<div class="home">
+  <app-header></app-header>
+  
+  <main class="main-content">
+    <div class="menu-grid">
+      <a *ngFor="let item of menuItems" [routerLink]="item.route" class="menu-item">
+        <div class="icon">{{item.icon}}</div>
+        <div>
+          <h3 class="title">{{item.title}}</h3>
+          <p class="description">{{item.description}}</p>
+        </div>
+      </a>
+      
+    </div>
+  </main>
+</div>

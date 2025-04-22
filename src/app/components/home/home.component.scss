@@ -1,0 +1,33 @@
+.home {
+  @apply min-h-screen bg-gray-50;
+
+  .main-content {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8;
+  }
+
+  .menu-grid {
+    @apply flex flex-col gap-4; // changed from grid to flex-col
+  }
+
+  .menu-item {
+    @apply h-60 bg-white rounded-lg shadow-md p-6 sm:p-8 hover:shadow-lg transition-shadow cursor-pointer flex items-start text-left;
+  
+    .icon {
+      @apply text-6xl mr-6 text-secondary flex items-center;
+    }
+    
+    .menu-item {
+      @apply h-60 sm:h-64 p-8;
+    }
+  
+    .title {
+      @apply text-3xl sm:text-4xl font-bold text-secondary mb-2;
+    }
+    
+  
+    .description {
+      @apply text-base sm:text-lg text-gray-600;
+    }
+  }
+  
+}  

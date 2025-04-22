@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #76A923;
+  --secondary: #006044;
+  --accent: #AF8A49;
+}
+
+body {
+  @apply bg-gray-50;
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-opacity-90;
+  }
+}
+#toast-container > div {
+  font-size: 22px !important;       // Bigger, bolder text
+  font-weight: 600 !important;      // Slightly heavier font
+  padding: 28px 35px !important;    // Spacious padding
+  border-radius: 12px !important;   // Softer corners
+  min-width: 420px !important;      // Wider default width
+  max-width: 640px !important;      // Maximum toast width
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2) !important; // More visible shadow
+  line-height: 1.6 !important;      // Better vertical spacing
+}
+
+
+#toast-container > div.toast-success {
+  background-color: #4caf50;       // Optional: custom green
+  color: white;
+}
+
+#toast-container > div.toast-error {
+  background-color: #f44336;       // Optional: custom red
+  color: white;
+}
+
+#toast-container > div.toast-warning {
+  background-color: #ff9800;       // Optional: custom amber
+  color: white;
+}

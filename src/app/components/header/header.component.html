@@ -1,0 +1,22 @@
+<header class="bg-green-800 text-white py-6 px-6 sm:px-10">
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+    <!-- Logo/Title -->
+    <div class="logo-container">
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-wide">Membership Portal</h1>
+    </div>
+
+    <!-- User Info & Logout -->
+    <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8 w-full sm:w-auto">
+      <div class="user-details text-xl sm:text-2xl">
+        <p class="font-semibold">Welcome, {{ userInfo.firstName }} {{ userInfo.lastName }}</p>
+        <p class="text-green-200">
+          Balance: R{{ userInfo.balance?.toFixed(2) }}
+        </p>
+        
+      </div>
+      <button class="bg-white text-green-800 font-bold text-xl sm:text-2xl px-6 py-3 rounded-lg hover:bg-gray-100 transition">
+        Logout
+      </button>
+    </div>
+  </div>
+</header>

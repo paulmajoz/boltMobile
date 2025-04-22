@@ -1,0 +1,43 @@
+<div class="min-h-screen bg-gray-50 flex flex-col">
+    <app-header></app-header>
+  
+    <main class="flex-1 p-6 sm:p-10">
+      <h3 class="text-4xl font-bold text-secondary mb-10">Purchase Electricity</h3>
+  
+      <form (ngSubmit)="purchaseElectricity()" class="flex flex-col gap-10 text-2xl sm:text-3xl">
+  
+        <!-- Meter Number -->
+        <div>
+          <label class="block mb-4 font-bold">Meter Number:</label>
+          <input
+            type="text"
+            [(ngModel)]="meterNumber"
+            name="meterNumber"
+            required
+            class="w-full border-2 border-gray-300 rounded-xl px-8 py-6"
+          />
+        </div>
+  
+        <!-- Amount in Cents -->
+        <div>
+          <label class="block mb-4 font-bold">Amount (in cents):</label>
+          <input
+            type="number"
+            [(ngModel)]="amountInCents"
+            name="amountInCents"
+            required
+            class="w-full border-2 border-gray-300 rounded-xl px-8 py-6"
+          />
+        </div>
+  
+  
+        <button
+          type="submit"
+          class="bg-green-600 hover:bg-green-700 text-white font-extrabold py-6 px-10 rounded-xl w-full"
+        >
+          Buy Electricity
+        </button>
+      </form>
+    </main>
+  </div>
+  

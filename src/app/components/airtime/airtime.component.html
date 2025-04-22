@@ -1,0 +1,56 @@
+<div class="airtime-page min-h-screen bg-gray-50 flex flex-col">
+  <app-header></app-header>
+
+  <main class="flex-1 p-6 sm:p-10">
+    <h3 class="text-4xl font-bold text-secondary mb-10">Purchase Airtime</h3>
+
+    <form (ngSubmit)="purchaseAirtime()" class="flex flex-col gap-10 text-2xl sm:text-3xl">
+      <div>
+        <label for="airtimeProduct" class="block text-2xl sm:text-3xl font-bold mb-4">Select Airtime Product:</label>
+        <select
+          id="airtimeProduct"
+          [(ngModel)]="selectedAirtimeProduct"
+          name="airtimeProduct"
+          required
+          class="w-full border-2 border-gray-300 rounded-xl px-8 py-6 text-2xl sm:text-3xl"
+        >
+          <option *ngFor="let product of airtimeProducts" [ngValue]="product">
+            {{ product.product_description }} - R{{ product.product_value }}
+          </option>
+        </select>
+      </div>
+
+      <div>
+        <label for="airtimeMobileNumber" class="block text-2xl sm:text-3xl font-bold mb-4">Mobile Number:</label>
+        <input
+          type="text"
+          id="airtimeMobileNumber"
+          [(ngModel)]="airtimeMobileNumber"
+          name="airtimeMobileNumber"
+          inputmode="numeric"
+          required
+          class="w-full border-2 border-gray-300 rounded-xl px-8 py-6 text-2xl sm:text-3xl"
+        />
+      </div>
+
+      <div>
+        <label for="airtimeAmount" class="block text-2xl sm:text-3xl font-bold mb-4">Amount:</label>
+        <input
+          type="number"
+          id="airtimeAmount"
+          [(ngModel)]="airtimeInputValue"
+          name="airtimeAmount"
+          required
+          class="w-full border-2 border-gray-300 rounded-xl px-8 py-6 text-2xl sm:text-3xl"
+        />
+      </div>
+
+      <button
+        type="submit"
+        class="bg-green-600 hover:bg-green-700 text-white font-extrabold py-6 px-10 rounded-xl text-2xl sm:text-3xl w-full"
+      >
+        Buy Airtime
+      </button>
+    </form>
+  </main>
+</div>
