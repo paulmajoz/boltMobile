@@ -36,9 +36,14 @@ export class ApiService {
   constructor(private http: HttpClient) {}
 
   // ✅ Authentication
-  login(credentials: { email: string; password: string }): Observable<any> {
-    return of({ success: true }); // mock login
-  }
+// src/app/services/api.service.ts
+// api.service.ts
+login(credentials: { employeeNumber: string; nationalId: string }): Observable<any> {
+  console.log('Logging in with:', credentials);
+  return this.http.post(`${this.apiUrl}/users/login`, credentials);
+}
+
+
 
   getUserInfo(): Observable<any> {
     return of(this.mockUserInfo);
@@ -73,12 +78,5 @@ export class ApiService {
     return this.http.get<any[]>(`${this.apiUrl}/activity`);
   }
 
-  getUserBalance(username: string) {
-    return this.http.get<{ username: string; closingBalance: number }>(
-      `${this.apiUrl}/user-credits/balance/${username}`
-    );
-  }
-  
-  
-  
+
 }

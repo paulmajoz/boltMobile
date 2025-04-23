@@ -17,6 +17,7 @@ export class AirtimeComponent implements OnInit {
   selectedAirtimeProduct: any;
   airtimeMobileNumber = '';
   airtimeInputValue = 0;
+  buttonDisabled = false; // ✅ New flag
 
   constructor(
     private purchaseService: PurchaseService,
@@ -41,6 +42,8 @@ export class AirtimeComponent implements OnInit {
       this.toastr.warning('Please complete all fields.', 'Missing Info');
       return;
     }
+    this.buttonDisabled = true; // ✅ Disable button
+    setTimeout(() => (this.buttonDisabled = false), 10000); 
 const amountInCents = this.airtimeInputValue * 100;
 
     this.purchaseService.purchaseAirtime(

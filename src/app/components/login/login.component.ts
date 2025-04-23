@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../services/api.service';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-login',
@@ -11,23 +12,51 @@ import { ApiService } from '../../services/api.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent {
-  email: string = '';
-  password: string = '';
+export class LoginComponent implements OnInit {
+  employeeNumber: string = '';
+  nationalId: string = '';
+  errorMessage: string = '';
+  private userhash: string = '';
 
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(
+    private apiService: ApiService,
+    private router: Router,
+    private route: ActivatedRoute,
+    private userService: UserService
+  ) {}
 
-  onSubmit() {
-    this.apiService.login({ email: this.email, password: this.password })
-      .subscribe({
-        next: (response) => {
-          // Handle successful login
-          this.router.navigate(['/home']);
-        },
-        error: (error) => {
-          this.router.navigate(['/home']);
-          console.error('Login failed:', error);
-        }
-      });
+  ngOnInit(): void {
+    this.userhash = '123';
+    this.route.queryParamMap.subscribe(params => {
+      const field1 = params.get('field1');
+      if (field1) {
+        this.userhash = field1;
+        console.log('✅ userhash from query param:', this.userhash);
+      } else {
+        console.warn('❌ No userhash in query params');
+      }
+    });
   }
+  
+  onSubmit(): void {
+    const credentials = {
+      employeeNumber: this.employeeNumber,
+      nationalId: this.nationalId,
+      userhash: this.userhash 
+    };
+    console.log('credentials :>> ', credentials);
+  
+    this.apiService.login(credentials).subscribe({
+      next: (response) => {
+        this.userService.setUser(this.employeeNumber);
+        console.log('✅ Login successful. Navigating to /home...',response);
+        this.router.navigate(['/home'], { relativeTo: null });
+      },
+      error: (error) => {
+        this.errorMessage = 'Login failed. Check your employee number or nationalId.';
+        console.error('❌ Login failed:', error);
+      }
+    });
+  }
+  
 }

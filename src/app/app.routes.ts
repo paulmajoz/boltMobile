@@ -10,6 +10,12 @@ import { DataComponent } from './components/data/data.component';
 import { ElectricityComponent } from './components/electricity/electricity.component';
 
 export const routes: Routes = [
+  // Replace this:
+  // { path: ':userhash', component: LoginComponent },
+
+  // With this scoped route instead:
+  { path: ':userhash/login', component: LoginComponent },
+
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'home', component: HomeComponent },

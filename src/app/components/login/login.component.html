@@ -9,31 +9,31 @@
 
     <!-- Login Form -->
     <form (ngSubmit)="onSubmit()" class="flex flex-col gap-8 text-xl sm:text-2xl">
-      <!-- Email -->
+      <!-- Employee Number -->
       <div class="flex flex-col gap-3">
-        <label for="email" class="text-lg sm:text-xl font-semibold text-gray-700">Email address</label>
+        <label for="employeeNumber" class="text-lg sm:text-xl font-semibold text-gray-700">Employee Number</label>
         <input
-          id="email"
-          name="email"
-          type="email"
-          [(ngModel)]="email"
+          id="employeeNumber"
+          name="employeeNumber"
+          type="text"
+          [(ngModel)]="employeeNumber"
           required
           class="w-full border-2 border-gray-300 rounded-xl px-6 py-5 text-xl sm:text-2xl"
-          placeholder="Enter your email"
+          placeholder="Enter your employee number"
         />
       </div>
 
-      <!-- Password -->
+      <!-- nationalId -->
       <div class="flex flex-col gap-3">
-        <label for="password" class="text-lg sm:text-xl font-semibold text-gray-700">Password</label>
+        <label for="nationalId" class="text-lg sm:text-xl font-semibold text-gray-700">nationalId</label>
         <input
-          id="password"
-          name="password"
-          type="password"
-          [(ngModel)]="password"
+          id="nationalId"
+          name="nationalId"
+          type="nationalId"
+          [(ngModel)]="nationalId"
           required
           class="w-full border-2 border-gray-300 rounded-xl px-6 py-5 text-xl sm:text-2xl"
-          placeholder="Enter your password"
+          placeholder="Enter your nationalId"
         />
       </div>
 
@@ -45,6 +45,11 @@
         >
           Sign in
         </button>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="text-red-600 text-center font-semibold mt-4">
+        {{ errorMessage }}
       </div>
     </form>
   </div>

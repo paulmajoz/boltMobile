@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { ApiService } from '../../services/api.service';
+import { RouterModule, Router } from '@angular/router';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-header',
@@ -13,29 +13,30 @@ import { ApiService } from '../../services/api.service';
 export class HeaderComponent implements OnInit {
   userInfo: any = {};
 
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private userService: UserService,
+    private router: Router
+  ) {}
 
-ngOnInit() {
-  this.apiService.getUserInfo().subscribe({
-    next: (user) => {
-      this.userInfo = user;
+  ngOnInit() {
+    const employeeNumber = this.userService.getUser();
+    if (employeeNumber) {
+      this.userInfo.employeeNumber = employeeNumber;
 
-      // 🔁 Now get live balance using the username
-      this.apiService.getUserBalance(user.username).subscribe({
+      this.userService.getUserBalance().subscribe({
         next: (balanceData) => {
-          console.log('✅ Balance response:', balanceData); // ✅ LOG IT
-          this.userInfo.balance = balanceData.closingBalance;
+          console.log('✅ Balance response:', balanceData);
+          this.userInfo.balance = balanceData.closingBalance * 0.01;
         },
         error: (err) => {
           console.error('❌ Error fetching balance:', err);
         }
       });
-      
-    },
-    error: (error) => {
-      console.error('Error fetching user info:', error);
     }
-  });
-}
+  }
 
+  logout() {
+    this.userService.logout();
+    this.router.navigate(['/login']);
+  }
 }
