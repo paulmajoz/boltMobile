@@ -50,11 +50,11 @@ export class ElectricityComponent implements OnInit {
 
     try {
       const result = await this.purchaseService.purchaseElectricity(
-        this.selectedElectricityProduct.product_code,
         this.meterNumber,
         this.amountInCents,
         this.customReference
       );
+      
 
       console.log('✅ Final Electricity Purchase Flow Result:', result);
 
