@@ -23,8 +23,9 @@ export class ElectricityComponent implements OnInit {
     product_value: '0.0'
   };
   meterNumber = '';
-  amountInCents = 0;
+  amountInRands = 0;
   customReference = '';
+  token: string | null = null;
 
   constructor(
     private purchaseService: PurchaseService,
@@ -43,7 +44,7 @@ export class ElectricityComponent implements OnInit {
   }
 
   async purchaseElectricity(): Promise<void> {
-    if (!this.selectedElectricityProduct || !this.meterNumber || !this.amountInCents) {
+    if (!this.selectedElectricityProduct || !this.meterNumber || !this.amountInRands) {
       this.toastr.warning('Please fill in all required fields.', 'Incomplete Form');
       return;
     }
@@ -51,24 +52,34 @@ export class ElectricityComponent implements OnInit {
     try {
       const result = await this.purchaseService.purchaseElectricity(
         this.meterNumber,
-        this.amountInCents,
+        this.amountInRands*100,
         this.customReference
       );
-      
 
       console.log('✅ Final Electricity Purchase Flow Result:', result);
-
       this.toastr.success('Electricity purchase and confirmation successful!', 'Success');
 
-      if (result.transactionResponse) {
-        this.toastr.success('Transaction response received.', 'Response Success');
-      } else {
-        this.toastr.warning('No transaction response returned.', 'Warning');
-      }
+      const token = result?.transactionResponse?.data?.elec_data?.std_tokens?.[0]?.code;
 
+      if (token) {
+        this.token = token;
+        console.log('token :>> ', token);
+        this.toastr.success('Token received!', 'Token Ready');
+      } else {
+        this.token = null;
+        this.toastr.warning('No token received in response.', 'Missing Token');
+      }
     } catch (error) {
       console.error('❌ Electricity purchase failed:', error);
       this.toastr.error('Electricity purchase failed. Please try again.', 'Error');
+    }
+  }
+
+  copyTokenToClipboard(): void {
+    if (this.token) {
+      navigator.clipboard.writeText(this.token).then(() => {
+        this.toastr.success('Token copied to clipboard!', 'Copied');
+      });
     }
   }
 }
