@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { environment } from '../../enviroments/enviroment';
 
-
 export interface Transaction {
   id: string;
   amount: number;
@@ -19,14 +18,12 @@ export interface Benefit {
   active: boolean;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ApiService {
-  private apiUrl = environment._umsukaApi;
+  private readonly apiUrl = environment._umsukaApi;
 
-  // ✅ Mock user data (keep this for login/header)
-  private mockUserInfo = {
+  /** ⚠️ Mock user data — remove in production */
+  private readonly mockUserInfo = {
     username: 'umsuka-wemali-test',
     firstName: 'John',
     lastName: 'Doe',
@@ -35,48 +32,43 @@ export class ApiService {
 
   constructor(private http: HttpClient) {}
 
-  // ✅ Authentication
-// src/app/services/api.service.ts
-// api.service.ts
-login(credentials: { employeeNumber: string; nationalId: string }): Observable<any> {
-  console.log('Logging in with:', credentials);
-  return this.http.post(`${this.apiUrl}/users/login`, credentials);
-}
+  /** Login user with credentials */
+  login(credentials: { employeeNumber: string; nationalId: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/users/login`, credentials);
+  }
 
-
-
+  /** Get mock user info (used for header/testing) */
   getUserInfo(): Observable<any> {
     return of(this.mockUserInfo);
   }
 
-  // ✅ Transactions
+  /** Fetch all transactions */
   getTransactions(): Observable<Transaction[]> {
     return this.http.get<Transaction[]>(`${this.apiUrl}/transactions`);
   }
 
+  /** Add a new transaction */
   addTransaction(transaction: Omit<Transaction, 'id'>): Observable<Transaction> {
     return this.http.post<Transaction>(`${this.apiUrl}/transactions`, transaction);
   }
 
-  // ✅ Benefits
+  /** Fetch all active benefits */
   getBenefits(): Observable<Benefit[]> {
     return this.http.get<Benefit[]>(`${this.apiUrl}/benefits`);
   }
 
-  // ✅ Profile
+  /** Update user profile */
   updateProfile(profileData: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/profile`, profileData);
   }
 
-  // ✅ Account
+  /** Get user account details */
   getAccountDetails(): Observable<any> {
     return this.http.get(`${this.apiUrl}/account`);
   }
 
-  // ✅ Activity
+  /** Get recent user activity */
   getRecentActivity(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/activity`);
   }
-
-
 }

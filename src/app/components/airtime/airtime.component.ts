@@ -19,13 +19,13 @@ export class AirtimeComponent implements OnInit {
   selectedAirtimeProduct: any;
   airtimeMobileNumber = '';
   airtimeInputValue = 0;
+  availableAirtimeLimit = 0;
   buttonDisabled = false;
-  availableAirtimeLimit: number = 0;
+  isLoading = false;
+
   mobileNumbers: string[] = [];
   newMobile = '';
   employeeNumber = '';
-  isLoading = false;
-
 
   constructor(
     private purchaseService: PurchaseService,
@@ -35,48 +35,56 @@ export class AirtimeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.fetchAirtimeProducts();
-
     this.employeeNumber = localStorage.getItem('employeeNumber') || '';
     if (!this.employeeNumber) return;
 
+    this.fetchAirtimeProducts();
+    this.loadMobileNumbers();
+    this.calculateAvailableLimit();
+  }
+
+  fetchAirtimeProducts(): void {
+    this.purchaseService.getAirtimeProducts().subscribe({
+      next: (response) => {
+        if (response.success && response.product_list.length > 0) {
+          this.airtimeProducts = response.product_list;
+          this.selectedAirtimeProduct = this.airtimeProducts[0];
+        }
+      },
+      error: () => this.toastr.error('Failed to load airtime products', 'Error')
+    });
+  }
+
+  loadMobileNumbers(): void {
     this.userService.getUserProfile(this.employeeNumber).subscribe({
       next: (user) => {
         this.mobileNumbers = user.mobileNumbers || [];
       },
-      error: () => this.toastr.error('Failed to load mobile numbers', 'Error'),
+      error: () => this.toastr.error('Failed to load mobile numbers', 'Error')
     });
+  }
 
+  calculateAvailableLimit(): void {
     let closingBalance = 0;
 
-    const fetchAirtimeLimit = () => {
+    const fetchLimit = () => {
       this.userService.getAppParam('airtimeLimit').subscribe({
         next: (paramData) => {
           const airtimeLimit = parseFloat(paramData.value);
           this.availableAirtimeLimit = airtimeLimit - closingBalance;
         },
-        error: (err) => console.error('Error fetching airtimeLimit:', err)
+        error: () => console.error('Failed to fetch airtimeLimit')
       });
     };
 
     this.userService.getUserBalance(this.employeeNumber).subscribe({
       next: (balanceData) => {
         closingBalance = (balanceData?.closingBalance ?? 0) * 0.01;
-        fetchAirtimeLimit();
+        fetchLimit();
       },
-      error: (err) => {
-        console.error('Error fetching user balance, defaulting to 0:', err);
-        fetchAirtimeLimit();
-      }
-    });
-  }
-
-  fetchAirtimeProducts(): void {
-    this.purchaseService.getAirtimeProducts().subscribe(response => {
-      console.log('response :>> ', response);
-      if (response.success && response.product_list.length > 0) {
-        this.airtimeProducts = response.product_list;
-        this.selectedAirtimeProduct = this.airtimeProducts[0];
+      error: () => {
+        console.error('Failed to fetch user balance, defaulting to 0');
+        fetchLimit();
       }
     });
   }
@@ -86,42 +94,31 @@ export class AirtimeComponent implements OnInit {
       this.toastr.warning('Please complete all fields.', 'Missing Info');
       return;
     }
-  
+
     this.buttonDisabled = true;
     this.isLoading = true;
-  
     const amountInCents = this.airtimeInputValue * 100;
-  
+
     this.purchaseService.purchaseAirtime(
       this.selectedAirtimeProduct.product_code,
       this.airtimeMobileNumber,
       amountInCents
     ).subscribe({
       next: (response) => {
-        console.log('✅ Airtime purchase response:', response);
-        if (response && response.reference) {
+        if (response?.reference) {
           this.toastr.success('Airtime purchase successful.', 'Success');
           setTimeout(() => window.location.reload(), 500);
         } else {
           this.toastr.error('Purchase went through but no reference received.', 'Missing Reference');
         }
       },
-      error: (error) => {
+      error: () => {
         this.toastr.error('Airtime purchase failed. Please try again.', 'Error');
-        console.error('❌ Airtime purchase failed:', error);
       },
       complete: () => {
         this.buttonDisabled = false;
         this.isLoading = false;
       }
-    });
-  }
-  
-
-  saveMobiles(): void {
-    this.userService.updateMobileNumbers(this.employeeNumber, this.mobileNumbers).subscribe({
-      next: () => this.toastr.success('Mobile numbers updated', 'Success'),
-      error: () => this.toastr.error('Failed to update mobile numbers', 'Error'),
     });
   }
 
@@ -133,6 +130,13 @@ export class AirtimeComponent implements OnInit {
     }
   }
 
+  saveMobiles(): void {
+    this.userService.updateMobileNumbers(this.employeeNumber, this.mobileNumbers).subscribe({
+      next: () => this.toastr.success('Mobile numbers updated', 'Success'),
+      error: () => this.toastr.error('Failed to update mobile numbers', 'Error'),
+    });
+  }
+
   selectMobile(mobile: string): void {
     this.airtimeMobileNumber = mobile;
     this.toastr.success('Mobile selected!', 'Selected');
@@ -141,15 +145,14 @@ export class AirtimeComponent implements OnInit {
   deleteMobile(mobile: string): void {
     this.userService.deleteMobileNumber(this.employeeNumber, mobile).subscribe({
       next: () => {
-        this.toastr.success('Mobile number deleted', 'Success');
         this.mobileNumbers = this.mobileNumbers.filter((m) => m !== mobile);
+        this.toastr.success('Mobile number deleted', 'Success');
       },
       error: () => {
         this.toastr.error('Failed to delete mobile number', 'Error');
       }
     });
   }
-  
 
   goHome(): void {
     this.router.navigate(['/home']);

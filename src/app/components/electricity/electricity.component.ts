@@ -16,19 +16,21 @@ import { Router } from '@angular/router';
 })
 export class ElectricityComponent implements OnInit {
   electricityProducts: any[] = [];
-  selectedElectricityProduct = {
+  selectedElectricityProduct: any = {
     product_type: 'electricity',
-    product_list_hash: 'ae368a3d821db81dbd888b670f3d49a2e596715c13573',
+    product_list_hash: '',
     product_code: '44',
     product_description: 'Buy Electricity',
     product_category: 'Electricity',
     product_value: '0.0'
   };
+
   meterNumber = '';
   amountInRands = 0;
   customReference = '';
   token: string | null = null;
-  availableAirtimeLimit: number = 0;
+
+  availableAirtimeLimit = 0;
   employeeNumber = '';
   mobileNumbers: string[] = [];
   electricityMeters: string[] = [];
@@ -36,50 +38,33 @@ export class ElectricityComponent implements OnInit {
   newMeter = '';
   isLoading = false;
 
-
   constructor(
-    private purchaseService: PurchaseService,
-    private userService: UserService,
-    private toastr: ToastrService,
-    private router: Router
+    private readonly purchaseService: PurchaseService,
+    private readonly userService: UserService,
+    private readonly toastr: ToastrService,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {
-    const employeeNumber = localStorage.getItem('employeeNumber');
-    if (!employeeNumber) return;
-    this.employeeNumber = employeeNumber;
+    this.employeeNumber = localStorage.getItem('employeeNumber') || '';
+    if (!this.employeeNumber) return;
 
     this.loadProfileData();
     this.fetchElectricityProducts();
-
-    let closingBalance = 0;
-
-    const fetchAirtimeLimit = () => {
-      this.userService.getAppParam('airtimeLimit').subscribe({
-        next: (paramData) => {
-          const airtimeLimit = parseFloat(paramData.value);
-          this.availableAirtimeLimit = airtimeLimit - closingBalance;
-        },
-        error: (err) => console.error('Error fetching airtimeLimit:', err)
-      });
-    };
-
-    this.userService.getUserBalance().subscribe({
-      next: (balanceData) => {
-        closingBalance = (balanceData?.closingBalance ?? 0) * 0.01;
-        fetchAirtimeLimit();
-      },
-      error: (err) => {
-        console.error('Error fetching user balance, defaulting to 0:', err);
-        fetchAirtimeLimit();
-      }
-    });
+    this.calculateAvailableLimit();
   }
 
   fetchElectricityProducts(): void {
-    this.purchaseService.getAirtimeProducts().subscribe(response => {
-      this.electricityProducts = response.product_list;
-      this.selectedElectricityProduct = this.electricityProducts[0];
+    this.purchaseService.getAirtimeProducts().subscribe({
+      next: (response) => {
+        if (response.success && response.product_list.length > 0) {
+          this.electricityProducts = response.product_list;
+          this.selectedElectricityProduct = response.product_list[0];
+        }
+      },
+      error: () => {
+        this.toastr.error('Failed to load electricity products', 'Error');
+      }
     });
   }
 
@@ -88,48 +73,67 @@ export class ElectricityComponent implements OnInit {
       this.toastr.warning('Please fill in all required fields.', 'Incomplete Form');
       return;
     }
-  
+
     this.isLoading = true;
-  
+
     try {
       const result = await this.purchaseService.purchaseElectricity(
         this.meterNumber,
         this.amountInRands * 100,
         this.customReference
       );
-  
-      console.log('✅ Final Electricity Purchase Flow Result:', result);
-      this.toastr.success('Electricity purchase and confirmation successful!', 'Success');
-  
+
       const token = result?.transactionResponse?.data?.elec_data?.std_tokens?.[0]?.code;
-  
+      this.token = token || null;
+
       if (token) {
-        this.token = token;
-        console.log('token :>> ', token);
+        this.toastr.success('Electricity purchase and confirmation successful!', 'Success');
         this.toastr.success('Token received!', 'Token Ready');
       } else {
-        this.token = null;
         this.toastr.warning('No token received in response.', 'Missing Token');
       }
     } catch (error) {
-      console.error('❌ Electricity purchase failed:', error);
       this.toastr.error('Electricity purchase failed. Please try again.', 'Error');
     } finally {
       this.isLoading = false;
     }
   }
-  
 
-  copyTokenToClipboard(): void {
-    if (this.token) {
-      navigator.clipboard.writeText(this.token).then(() => {
-        this.toastr.success('Token copied to clipboard!', 'Copied');
+  calculateAvailableLimit(): void {
+    let closingBalance = 0;
+
+    const fetchLimit = () => {
+      this.userService.getAppParam('airtimeLimit').subscribe({
+        next: (paramData) => {
+          const airtimeLimit = parseFloat(paramData.value);
+          this.availableAirtimeLimit = airtimeLimit - closingBalance;
+        },
+        error: () => console.error('Error fetching airtimeLimit')
       });
-    }
+    };
+
+    this.userService.getUserBalance(this.employeeNumber).subscribe({
+      next: (balanceData) => {
+        closingBalance = (balanceData?.closingBalance ?? 0) * 0.01;
+        fetchLimit();
+      },
+      error: () => {
+        console.error('Error fetching user balance, defaulting to 0');
+        fetchLimit();
+      }
+    });
   }
 
-  goHome(): void {
-    this.router.navigate(['/home']);
+  loadProfileData(): void {
+    this.userService.getUserProfile(this.employeeNumber).subscribe({
+      next: (user) => {
+        this.mobileNumbers = user.mobileNumbers || [];
+        this.electricityMeters = user.electricityMeters || [];
+      },
+      error: () => {
+        this.toastr.error('Failed to load profile data', 'Error');
+      }
+    });
   }
 
   addMeter(): void {
@@ -155,24 +159,22 @@ export class ElectricityComponent implements OnInit {
   deleteMeter(meter: string): void {
     this.userService.deleteElectricityMeter(this.employeeNumber, meter).subscribe({
       next: () => {
-        this.toastr.success('Meter deleted', 'Success');
         this.electricityMeters = this.electricityMeters.filter((m) => m !== meter);
+        this.toastr.success('Meter deleted', 'Success');
       },
-      error: () => {
-        this.toastr.error('Failed to delete meter', 'Error');
-      }
+      error: () => this.toastr.error('Failed to delete meter', 'Error')
     });
   }
-  
 
-  loadProfileData(): void {
-    this.userService.getUserProfile(this.employeeNumber).subscribe({
-      next: (user) => {
-        console.log('user :>> ', user);
-        this.mobileNumbers = user.mobileNumbers || [];
-        this.electricityMeters = user.electricityMeters || [];
-      },
-      error: () => this.toastr.error('Failed to load profile data', 'Error'),
-    });
+  copyTokenToClipboard(): void {
+    if (this.token) {
+      navigator.clipboard.writeText(this.token).then(() => {
+        this.toastr.success('Token copied to clipboard!', 'Copied');
+      });
+    }
+  }
+
+  goHome(): void {
+    this.router.navigate(['/home']);
   }
 }

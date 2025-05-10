@@ -5,6 +5,12 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 import { UserService } from '../../services/user.service';
 
+interface LoginCredentials {
+  employeeNumber: string;
+  nationalId: string;
+  userhash: string;
+}
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -13,51 +19,42 @@ import { UserService } from '../../services/user.service';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
-  employeeNumber: string = '';
-  nationalId: string = '';
-  errorMessage: string = '';
-  private userhash: string = '';
+  employeeNumber = '';
+  nationalId = '';
+  errorMessage = '';
+  private userhash = '123';
 
   constructor(
-    private apiService: ApiService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private userService: UserService
+    private readonly apiService: ApiService,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+    private readonly userService: UserService
   ) {}
 
   ngOnInit(): void {
-    this.userhash = '123';
     this.route.queryParamMap.subscribe(params => {
-      const field1 = params.get('field1');
-      if (field1) {
-        this.userhash = field1;
-        console.log('✅ userhash from query param:', this.userhash);
-      } else {
-        console.warn('❌ No userhash in query params');
+      const hash = params.get('field1');
+      if (hash) {
+        this.userhash = hash;
       }
     });
   }
-  
+
   onSubmit(): void {
-    const credentials = {
+    const credentials: LoginCredentials = {
       employeeNumber: this.employeeNumber,
       nationalId: this.nationalId,
-      userhash: this.userhash 
+      userhash: this.userhash
     };
-    console.log('credentials :>> ', credentials);
-  
+
     this.apiService.login(credentials).subscribe({
-      next: (response) => {
+      next: () => {
         this.userService.setUser(this.employeeNumber);
-        console.log('✅ Login successful. Navigating to /home...',response);
-        this.router.navigate(['/home'], { relativeTo: null });
+        this.router.navigate(['/home']);
       },
-      error: (error) => {
-        this.errorMessage = 'Login failed. Check your employee number or nationalId.';
-        // this.router.navigate(['/home'], { relativeTo: null });
-        console.error('❌ Login failed:', error);
+      error: () => {
+        this.errorMessage = 'Login failed. Check your employee number or national ID.';
       }
     });
   }
-  
 }

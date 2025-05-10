@@ -3,75 +3,79 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../enviroments/enviroment';
 import { Observable } from 'rxjs';
 
+interface AppParam {
+  key: string;
+  value: string;
+}
+
+interface UserBalance {
+  employeeNumber: string;
+  closingBalance: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class UserService {
-  private apiUrl = environment._umsukaApi;
+  private readonly apiUrl = environment._umsukaApi;
   private currentUser: string | null = null;
 
   constructor(private http: HttpClient) {}
 
-  // Set current user
-  setUser(employeeNumber: string) {
+  /** Set user and store in localStorage */
+  setUser(employeeNumber: string): void {
     this.currentUser = employeeNumber;
     localStorage.setItem('employeeNumber', employeeNumber);
   }
 
-  // Get current user
+  /** Get current user from memory or localStorage */
   getUser(): string | null {
     return this.currentUser || localStorage.getItem('employeeNumber');
   }
 
-  // Logout
-  logout() {
+  /** Clear stored user */
+  logout(): void {
     this.currentUser = null;
     localStorage.removeItem('employeeNumber');
   }
 
-  // Get user balance
-  getUserBalance(employeeNumber?: string): Observable<{ employeeNumber: string; closingBalance: number }> {
+  /** Fetch closing balance for user */
+  getUserBalance(employeeNumber?: string): Observable<UserBalance> {
     const id = employeeNumber || this.getUser();
-    if (!id) {
-      throw new Error('Employee number not available');
-    }
-
-    return this.http.get<{ employeeNumber: string; closingBalance: number }>(
-      `${this.apiUrl}/user-credits/balance/${id}`
-    );
+    if (!id) throw new Error('Employee number not available');
+    return this.http.get<UserBalance>(`${this.apiUrl}/user-credits/balance/${id}`);
   }
 
-  getTransactionsByEmployee(employeeNumber: any): Observable<any[]> {
-    console.log('emplo :>> ', employeeNumber)
+  /** Get transactions by employee number */
+  getTransactionsByEmployee(employeeNumber: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/transactions/employee/${employeeNumber}`);
   }
 
-  getAppParam(key: string) {
-    return this.http.get<{ key: string; value: string }>(`${this.apiUrl}/app-params/${key}`);
+  /** Get a specific app config param */
+  getAppParam(key: string): Observable<AppParam> {
+    return this.http.get<AppParam>(`${this.apiUrl}/app-params/${key}`);
   }
-  
-  getUserProfile(employeeNumber: string) {
+
+  /** Get detailed user profile */
+  getUserProfile(employeeNumber: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/users/${employeeNumber}`);
   }
-  
-  updateMobileNumbers(employeeNumber: string, mobileNumbers: string[]) {
+
+  /** Update saved mobile numbers for user */
+  updateMobileNumbers(employeeNumber: string, mobileNumbers: string[]): Observable<any> {
     return this.http.post(`${this.apiUrl}/users/update-mobiles/${employeeNumber}`, { mobileNumbers });
   }
-  
-  updateElectricityMeters(employeeNumber: string, electricityMeters: string[]) {
+
+  /** Update saved electricity meters for user */
+  updateElectricityMeters(employeeNumber: string, electricityMeters: string[]): Observable<any> {
     return this.http.post(`${this.apiUrl}/users/update-meters/${employeeNumber}`, { electricityMeters });
   }
 
-  deleteMobileNumber(employeeNumber: string, numberToDelete: string) {
-    return this.http.post(`${this.apiUrl}/users/delete-mobile/${employeeNumber}`, {
-      numberToDelete,
-    });
+  /** Delete one mobile number */
+  deleteMobileNumber(employeeNumber: string, numberToDelete: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/users/delete-mobile/${employeeNumber}`, { numberToDelete });
   }
-  
-  deleteElectricityMeter(employeeNumber: string, meterToDelete: string) {
-    return this.http.post(`${this.apiUrl}/users/delete-meter/${employeeNumber}`, {
-      meterToDelete,
-    });
-  }
-  
-  
 
+  /** Delete one meter number */
+  deleteElectricityMeter(employeeNumber: string, meterToDelete: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/users/delete-meter/${employeeNumber}`, { meterToDelete });
+  }
 }

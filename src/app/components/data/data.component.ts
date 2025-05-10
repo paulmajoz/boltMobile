@@ -19,69 +19,76 @@ export class DataComponent implements OnInit {
   selectedDataProduct: any;
   dataMobileNumber = '';
   dataInputValue = 0;
-  availableAirtimeLimit: number = 0;
+  availableAirtimeLimit = 0;
   mobileNumbers: string[] = [];
   newMobile = '';
   employeeNumber = '';
   isLoading = false;
 
-
   constructor(
-    private purchaseService: PurchaseService,
-    private userService: UserService,
-    private toastr: ToastrService,
-    private router: Router
+    private readonly purchaseService: PurchaseService,
+    private readonly userService: UserService,
+    private readonly toastr: ToastrService,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {
-    this.fetchDataProducts();
-
     this.employeeNumber = localStorage.getItem('employeeNumber') || '';
     if (!this.employeeNumber) return;
 
+    this.fetchDataProducts();
+    this.loadMobileNumbers();
+    this.calculateAvailableLimit();
+  }
+
+  fetchDataProducts(): void {
+    this.purchaseService.getDataProducts().subscribe({
+      next: (response) => {
+        if (response.success && response.product_list.length > 0) {
+          this.dataProducts = response.product_list;
+          this.selectedDataProduct = this.dataProducts[0];
+          this.dataInputValue = this.dataProducts[0].product_value;
+        } else {
+          this.toastr.warning('No data products available.', 'Warning');
+        }
+      },
+      error: () => {
+        this.toastr.error('Failed to load data products.', 'Error');
+      }
+    });
+  }
+
+  loadMobileNumbers(): void {
     this.userService.getUserProfile(this.employeeNumber).subscribe({
       next: (user) => {
         this.mobileNumbers = user.mobileNumbers || [];
       },
-      error: () => this.toastr.error('Failed to load mobile numbers', 'Error'),
+      error: () => this.toastr.error('Failed to load mobile numbers', 'Error')
     });
+  }
 
+  calculateAvailableLimit(): void {
     let closingBalance = 0;
 
-    const fetchAirtimeLimit = () => {
+    const fetchLimit = () => {
       this.userService.getAppParam('airtimeLimit').subscribe({
         next: (paramData) => {
           const airtimeLimit = parseFloat(paramData.value);
           this.availableAirtimeLimit = airtimeLimit - closingBalance;
         },
-        error: (err) => console.error('Error fetching airtimeLimit:', err)
+        error: () => console.error('Error fetching airtimeLimit')
       });
     };
 
-    this.userService.getUserBalance().subscribe({
+    this.userService.getUserBalance(this.employeeNumber).subscribe({
       next: (balanceData) => {
         closingBalance = (balanceData?.closingBalance ?? 0) * 0.01;
-        fetchAirtimeLimit();
+        fetchLimit();
       },
-      error: (err) => {
-        console.error('Error fetching user balance, defaulting to 0:', err);
-        fetchAirtimeLimit();
+      error: () => {
+        console.error('Error fetching user balance, defaulting to 0');
+        fetchLimit();
       }
-    });
-  }
-
-  fetchDataProducts(): void {
-    this.purchaseService.getDataProducts().subscribe(response => {
-      if (response.success && response.product_list.length > 0) {
-        this.dataProducts = response.product_list;
-        this.selectedDataProduct = this.dataProducts[0];
-        this.dataInputValue = this.dataProducts[0].product_value;
-      } else {
-        this.toastr.warning('No data products available.', 'Warning');
-      }
-    }, error => {
-      this.toastr.error('Failed to load data products.', 'Error');
-      console.error('❌ Error fetching data products:', error);
     });
   }
 
@@ -96,33 +103,25 @@ export class DataComponent implements OnInit {
       this.toastr.warning('Please enter all fields to proceed.', 'Incomplete Form');
       return;
     }
-  
+
     this.isLoading = true;
-  
+
+    const amountInCents = this.dataInputValue * 100;
+
     this.purchaseService.purchaseData(
       this.selectedDataProduct.product_code,
       this.dataMobileNumber,
-      this.dataInputValue * 100
+      amountInCents
     ).subscribe({
-      next: (response) => {
+      next: () => {
         this.toastr.success('Data purchase successful!', 'Success');
-        console.log('✅ Data purchase successful:', response);
       },
-      error: (error) => {
+      error: () => {
         this.toastr.error('Data purchase failed. Please try again.', 'Error');
-        console.error('❌ Data purchase failed:', error);
       },
       complete: () => {
         this.isLoading = false;
       }
-    });
-  }
-  
-
-  saveMobiles(): void {
-    this.userService.updateMobileNumbers(this.employeeNumber, this.mobileNumbers).subscribe({
-      next: () => this.toastr.success('Mobile numbers updated', 'Success'),
-      error: () => this.toastr.error('Failed to update mobile numbers', 'Error'),
     });
   }
 
@@ -134,6 +133,13 @@ export class DataComponent implements OnInit {
     }
   }
 
+  saveMobiles(): void {
+    this.userService.updateMobileNumbers(this.employeeNumber, this.mobileNumbers).subscribe({
+      next: () => this.toastr.success('Mobile numbers updated', 'Success'),
+      error: () => this.toastr.error('Failed to update mobile numbers', 'Error'),
+    });
+  }
+
   selectMobile(mobile: string): void {
     this.dataMobileNumber = mobile;
     this.toastr.success('Mobile selected!', 'Selected');
@@ -142,15 +148,14 @@ export class DataComponent implements OnInit {
   deleteMobile(mobile: string): void {
     this.userService.deleteMobileNumber(this.employeeNumber, mobile).subscribe({
       next: () => {
-        this.toastr.success('Mobile number deleted', 'Success');
         this.mobileNumbers = this.mobileNumbers.filter(m => m !== mobile);
+        this.toastr.success('Mobile number deleted', 'Success');
       },
       error: () => {
         this.toastr.error('Failed to delete mobile number', 'Error');
       }
     });
   }
-  
 
   goHome(): void {
     this.router.navigate(['/home']);
