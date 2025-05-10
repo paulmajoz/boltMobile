@@ -2,10 +2,56 @@
   <app-header></app-header>
 
   <main class="flex-1 p-6 sm:p-10">
+    <!-- Electricity Meters -->
+    <div class="mb-20">
+      <section>
+        <h3 class="font-bold mb-6 text-3xl sm:text-4xl">Saved Electricity Meter Numbers</h3>
+
+        <!-- Add Form -->
+        <div class="grid grid-cols-[1fr_auto] gap-6 items-center mb-10">
+          <input
+            [(ngModel)]="newMeter"
+            placeholder="Add new meter"
+            class="border-2 border-gray-300 rounded-xl px-8 py-6 text-2xl sm:text-3xl w-full"
+          />
+          <button
+            (click)="addMeter()"
+            class="bg-green-600 hover:bg-green-700 text-white font-bold py-6 px-10 rounded-xl text-2xl sm:text-3xl w-full sm:w-auto min-w-[160px]"
+          >
+            Add
+          </button>
+        </div>
+
+        <!-- Meter List -->
+        <div class="space-y-6 text-2xl sm:text-3xl">
+          <div
+            *ngFor="let meter of electricityMeters"
+            class="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] items-center bg-white p-4 rounded-xl shadow gap-4"
+          >
+            <span class="break-words">{{ meter }}</span>
+
+            <!-- Delete Button -->
+            <button
+              (click)="deleteMeter(meter)"
+              class="bg-red-600 hover:bg-red-700 text-white font-bold py-6 px-10 rounded-xl w-full sm:w-auto min-w-[140px]"
+            >
+              Delete
+            </button>
+            <!-- Select Button -->
+            <button
+              (click)="selectMeter(meter)"
+              class="bg-green-600 hover:bg-green-700 text-white font-bold py-6 px-10 rounded-xl w-full sm:w-auto min-w-[140px]"
+            >
+              Select
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
     <h3 class="text-4xl font-bold text-secondary mb-10">Purchase Electricity</h3>
 
     <form (ngSubmit)="purchaseElectricity()" class="flex flex-col gap-10 text-2xl sm:text-3xl">
-
       <!-- Meter Number -->
       <div>
         <label class="block mb-4 font-bold">Meter Number:</label>
@@ -21,26 +67,47 @@
       <!-- Amount in Rands -->
       <div>
         <label class="block mb-4 font-bold">Amount:</label>
-        <input
-          type="number"
-          [(ngModel)]="amountInRands"
-          name="amountInRands"
-          required
-          class="w-full border-2 border-gray-300 rounded-xl px-8 py-6"
-        />
+        <div class="relative w-full">
+          <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-2xl sm:text-3xl text-gray-500">R</span>
+          <input
+            type="number"
+            [(ngModel)]="amountInRands"
+            name="amountInRands"
+            required
+            class="w-full border-2 border-gray-300 rounded-xl pl-14 pr-8 py-6 text-2xl sm:text-3xl"
+          />
+        </div>
       </div>
 
+      <!-- Submit Button -->
       <button
         type="submit"
+        [disabled]="
+          !meterNumber || 
+          !amountInRands || 
+          amountInRands > availableAirtimeLimit || 
+          isLoading
+        "
         class="bg-green-600 hover:bg-green-700 text-white font-extrabold py-6 px-10 rounded-xl w-full"
       >
-        Buy Electricity
+        <span *ngIf="!isLoading">Buy Electricity</span>
+        <span *ngIf="isLoading">Processing...</span>
       </button>
+
+      <!-- Low Balance Warning -->
+      <p class="text-red-600 font-semibold" *ngIf="amountInRands > availableAirtimeLimit">
+        You do not have enough funds available.
+      </p>
     </form>
 
-    <!-- ✅ Token Display Box -->
+    <!-- Spinner -->
+    <div *ngIf="isLoading" class="flex justify-center items-center mt-10">
+      <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-green-600 border-solid"></div>
+    </div>
+
+    <!-- Token Display -->
     <div *ngIf="token" class="mt-10 bg-white shadow-md rounded-xl p-6 border-2 border-green-500">
-      <h4 class="text-2xl font-bold text-green-700 mb-4">Token Received</h4>
+      <h4 class="text-3xl font-bold text-green-700 mb-4">Token Received</h4>
       <div class="flex items-center justify-between">
         <span class="text-xl break-all">{{ token }}</span>
         <button
@@ -52,4 +119,13 @@
       </div>
     </div>
   </main>
+
+  <!-- Home Button -->
+  <button
+    (click)="goHome()"
+    style="bottom: 4rem; left: 4rem;"
+    class="fixed bg-green-600 hover:bg-green-700 text-white font-extrabold py-10 px-14 rounded-xl text-3xl sm:text-4xl shadow-xl"
+  >
+    Home
+  </button>
 </div>

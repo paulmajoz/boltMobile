@@ -26,7 +26,10 @@
             }
           },
           "options": {
-            "assets": [],
+            "assets": [
+              "src/favicon.ico",
+  "src/assets"
+            ],
             "index": "src/index.html",
             "browser": "src/main.ts",
             "outputPath": "dist/demo",
@@ -34,7 +37,8 @@
             "scripts": [],
             "styles": [
   "node_modules/ngx-toastr/toastr.css",
-  "src/styles.scss"
+  "src/styles.scss",
+   "node_modules/@fortawesome/fontawesome-free/css/all.css"
 ],
             "tsConfig": "tsconfig.app.json"
           }

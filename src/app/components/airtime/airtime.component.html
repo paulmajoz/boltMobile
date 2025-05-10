@@ -4,7 +4,55 @@
   <main class="flex-1 p-6 sm:p-10">
     <h3 class="text-4xl font-bold text-secondary mb-10">Purchase Airtime</h3>
 
+    <!-- Saved Mobile Numbers -->
+    <section class="mb-20">
+      <h3 class="font-bold mb-6 text-3xl sm:text-4xl">Saved Mobile Numbers</h3>
+
+      <!-- Add Form -->
+      <div class="grid grid-cols-[1fr_auto] gap-6 items-center mb-10">
+        <input
+          [(ngModel)]="newMobile"
+          placeholder="Add new mobile number"
+          class="border-2 border-gray-300 rounded-xl px-8 py-6 text-2xl sm:text-3xl w-full"
+        />
+        <button
+          (click)="addMobile()"
+          class="bg-green-600 hover:bg-green-700 text-white font-bold py-6 px-10 rounded-xl text-2xl sm:text-3xl w-full sm:w-auto min-w-[160px]"
+        >
+          Add
+        </button>
+      </div>
+
+      <!-- Mobile List -->
+      <div class="space-y-6 text-2xl sm:text-3xl">
+        <div
+          *ngFor="let mobile of mobileNumbers"
+          class="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] items-center bg-white p-4 rounded-xl shadow gap-4"
+        >
+          <span class="break-words">{{ mobile }}</span>
+
+          <!-- Delete Button -->
+          <button
+            (click)="deleteMobile(mobile)"
+            class="bg-red-600 hover:bg-red-700 text-white font-bold py-6 px-10 rounded-xl text-2xl sm:text-3xl w-full sm:w-auto min-w-[140px]"
+          >
+            Delete
+          </button>
+
+          <!-- Select Button -->
+          <button
+            (click)="selectMobile(mobile)"
+            class="bg-green-600 hover:bg-green-700 text-white font-bold py-6 px-10 rounded-xl text-2xl sm:text-3xl w-full sm:w-auto min-w-[140px]"
+          >
+            Select
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Airtime Purchase Form -->
     <form (ngSubmit)="purchaseAirtime()" class="flex flex-col gap-10 text-2xl sm:text-3xl">
+      <!-- Product Select -->
       <div>
         <label for="airtimeProduct" class="block text-2xl sm:text-3xl font-bold mb-4">Select Airtime Product:</label>
         <select
@@ -20,6 +68,7 @@
         </select>
       </div>
 
+      <!-- Mobile Input -->
       <div>
         <label for="airtimeMobileNumber" class="block text-2xl sm:text-3xl font-bold mb-4">Mobile Number:</label>
         <input
@@ -33,24 +82,56 @@
         />
       </div>
 
+      <!-- Amount Input -->
       <div>
         <label for="airtimeAmount" class="block text-2xl sm:text-3xl font-bold mb-4">Amount:</label>
-        <input
-          type="number"
-          id="airtimeAmount"
-          [(ngModel)]="airtimeInputValue"
-          name="airtimeAmount"
-          required
-          class="w-full border-2 border-gray-300 rounded-xl px-8 py-6 text-2xl sm:text-3xl"
-        />
+        <div class="relative w-full">
+          <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-2xl sm:text-3xl text-gray-500">R</span>
+          <input
+            type="number"
+            id="airtimeAmount"
+            [(ngModel)]="airtimeInputValue"
+            name="airtimeAmount"
+            required
+            class="w-full border-2 border-gray-300 rounded-xl pl-14 pr-8 py-6 text-2xl sm:text-3xl"
+          />
+        </div>
       </div>
 
+      <!-- Submit Button -->
       <button
         type="submit"
+        [disabled]="
+          !selectedAirtimeProduct || 
+          !airtimeMobileNumber || 
+          !airtimeInputValue || 
+          airtimeInputValue > availableAirtimeLimit || 
+          isLoading
+        "
         class="bg-green-600 hover:bg-green-700 text-white font-extrabold py-6 px-10 rounded-xl text-2xl sm:text-3xl w-full"
       >
-        Buy Airtime
+        <span *ngIf="!isLoading">Buy Airtime</span>
+        <span *ngIf="isLoading">Processing...</span>
       </button>
+
+      <!-- Low Balance Warning -->
+      <p class="text-red-600 font-semibold" *ngIf="airtimeInputValue > availableAirtimeLimit">
+        You do not have enough funds available.
+      </p>
+
+      <!-- Spinner -->
+      <div *ngIf="isLoading" class="flex justify-center items-center mt-10">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-green-600 border-solid"></div>
+      </div>
     </form>
   </main>
+
+  <!-- Home Button -->
+  <button
+    (click)="goHome()"
+    style="bottom: 4rem; left: 4rem;"
+    class="fixed bg-green-600 hover:bg-green-700 text-white font-extrabold py-10 px-14 rounded-xl text-3xl sm:text-4xl shadow-xl"
+  >
+    Home
+  </button>
 </div>

@@ -18,18 +18,13 @@ export class HomeComponent {
     //   icon: '📊',
     //   description: 'View your account overview and statistics'
     // },
-    { 
-      title: 'Profile', 
-      route: '/profile', 
-      icon: '👤',
-      description: 'Manage your personal information'
-    },
-    { 
-      title: 'Transactions', 
-      route: '/transactions', 
-      icon: '💳',
-      description: 'View your transaction history'
-    },
+    // { 
+    //   title: 'Profile', 
+    //   route: '/profile', 
+    //   icon: '👤',
+    //   description: 'Manage your personal information'
+    // },
+
     // { 
     //   title: 'Settings', 
     //   route: '/settings', 
@@ -39,20 +34,27 @@ export class HomeComponent {
     { 
       title: 'Airtime', 
       route: '/airtime', 
-      icon: '📞',
+      icon: 'phone',
       description: 'Purchase Airtime'
     },
     { 
       title: 'Data', 
       route: '/data', 
-      icon: '📲',
-      description: 'Purchase data'
+      icon: 'wifi',
+      description: 'Purchase Data'
     },
     { 
       title: 'Electricity', 
       route: '/electricity', 
-      icon: '⚡️',
+      icon: 'bolt',
       description: 'Purchase Electricity'
     },
+    { 
+      title: 'Transactions', 
+      route: '/transactions', 
+      icon: 'credit_card',
+      description: 'View your transaction history'
+    },
+  
   ];
 }

@@ -23,15 +23,33 @@ export class HeaderComponent implements OnInit {
     if (employeeNumber) {
       this.userInfo.employeeNumber = employeeNumber;
 
+      let closingBalance = 0; // ✅ Default to 0
+
       this.userService.getUserBalance().subscribe({
         next: (balanceData) => {
-          console.log('✅ Balance response:', balanceData);
-          this.userInfo.balance = balanceData.closingBalance * 0.01;
+          closingBalance = (balanceData?.closingBalance ?? 0) * 0.01;
+          this.userInfo.amountDue = closingBalance * (1 + 0.1 * 1.15);
+          fetchAirtimeLimit(); // proceed once balance is retrieved
         },
         error: (err) => {
-          console.error('❌ Error fetching balance:', err);
+          console.error('❌ Error fetching balance, defaulting to 0:', err);
+          closingBalance = 0;
+          this.userInfo.amountDue = 0;
+          fetchAirtimeLimit(); // still proceed with airtimeLimit call
         }
       });
+
+      const fetchAirtimeLimit = () => {
+        this.userService.getAppParam('airtimeLimit').subscribe({
+          next: (paramData) => {
+            const airtimeLimit = parseFloat(paramData.value);
+            this.userInfo.availableAirtime = airtimeLimit - closingBalance;
+          },
+          error: (err) => {
+            console.error('❌ Error fetching airtimeLimit:', err);
+          }
+        });
+      };
     }
   }
 

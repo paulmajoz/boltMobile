@@ -1,0 +1,83 @@
+<div class="min-h-screen bg-gray-50 flex flex-col">
+    <app-header></app-header>
+  
+    <main class="flex-1 p-6 sm:p-10">
+      <h2 class="text-4xl font-bold text-secondary mb-10">My Profile</h2>
+  
+      <!-- Cellphone Numbers -->
+      <section class="mb-16">
+        <h3 class="font-bold mb-6 text-3xl sm:text-4xl">Saved Cellphone Numbers</h3>
+  
+        <!-- Add Form -->
+        <div class="flex flex-col sm:flex-row gap-6 mb-10">
+          <input
+            [(ngModel)]="newMobile"
+            placeholder="Add new cellphone"
+            class="border-2 border-gray-300 rounded-xl px-8 py-6 text-2xl sm:text-3xl sm:flex-1"
+          />
+          <button
+            (click)="addMobile()"
+            class="bg-green-600 hover:bg-green-700 text-white font-bold py-6 px-10 rounded-xl text-2xl sm:text-3xl w-full sm:w-auto"
+          >
+            Add
+          </button>
+        </div>
+  
+        <!-- Number List -->
+        <div class="space-y-6 text-2xl sm:text-3xl">
+          <div *ngFor="let mobile of mobileNumbers" class="flex items-center justify-between bg-white p-4 rounded-xl shadow">
+            <span class="break-words">{{ mobile }}</span>
+            <button
+              (click)="copyToClipboard(mobile)"
+              class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl text-2xl sm:text-3xl shadow"
+            >
+              Copy
+            </button>
+          </div>
+        </div>
+      </section>
+  
+      <!-- Electricity Meters -->
+      <section>
+        <h3 class="font-bold mb-6 text-3xl sm:text-4xl">Saved Electricity Meter Numbers</h3>
+  
+        <!-- Add Form -->
+        <div class="flex flex-col sm:flex-row gap-6 mb-10">
+          <input
+            [(ngModel)]="newMeter"
+            placeholder="Add new meter"
+            class="border-2 border-gray-300 rounded-xl px-8 py-6 text-2xl sm:text-3xl sm:flex-1"
+          />
+          <button
+            (click)="addMeter()"
+            class="bg-green-600 hover:bg-green-700 text-white font-bold py-6 px-10 rounded-xl text-2xl sm:text-3xl w-full sm:w-auto"
+          >
+            Add
+          </button>
+        </div>
+  
+        <!-- Meter List -->
+        <div class="space-y-6 text-2xl sm:text-3xl">
+          <div *ngFor="let meter of electricityMeters" class="flex items-center justify-between bg-white p-4 rounded-xl shadow">
+            <span class="break-words">{{ meter }}</span>
+            <button
+              (click)="copyToClipboard(meter)"
+              class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl text-2xl sm:text-3xl shadow"
+            >
+              Copy
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  
+  <!-- Home Button -->
+  <button
+  (click)="goHome()"
+  style="bottom: 4rem; left: 4rem;"
+  class="fixed bg-green-600 hover:bg-green-700 text-white font-extrabold py-10 px-14 rounded-xl text-3xl sm:text-4xl shadow-xl"
+>
+  Home
+</button>
+  </div>
+  

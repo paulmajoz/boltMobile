@@ -1,0 +1,57 @@
+<!-- transactions.component.html -->
+
+<div class="min-h-screen bg-gray-50">
+    <app-header></app-header>
+  
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <h2 class="text-4xl font-bold text-secondary mb-6">Transactions</h2>
+  
+      <div *ngIf="transactions.length; else noData"><table class="min-w-full divide-y divide-gray-200 mt-6 text-2xl sm:text-3xl">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="text-left px-4 py-2">Product Code</th>
+            <th class="text-left px-4 py-2">Amount</th>
+            <th class="text-left px-4 py-2">Mobile/Meter</th>
+            <th class="text-left px-4 py-2">Date</th>
+            <th class="text-left px-4 py-2">Success</th> <!-- ✅ New column -->
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <tr *ngFor="let txn of transactions">
+            <td class="px-4 py-2">{{ txn.productCode }}</td>
+            <td class="px-4 py-2">R{{ txn.amount / 100 | number:'1.2-2' }}</td>
+            <td class="px-4 py-2">{{ txn.mobileNumber }}</td>
+            <td class="px-4 py-2">
+                {{ txn.createdAt | date:'medium' }}
+              </td>
+            <td class="px-4 py-2">
+              <span
+                [ngClass]="{
+                  'text-green-700 font-bold': txn.success === true,
+                  'text-red-600 font-bold': txn.success === false
+                }"
+              >
+                {{ txn.success === true ? '✔' : '✖' }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      </div>
+  
+      <ng-template #noData>
+        <p class="mt-4 text-gray-600 text-2xl">No transactions found.</p>
+      </ng-template>
+    </main>
+  
+  <!-- Home Button -->
+  <button
+  (click)="goHome()"
+  style="bottom: 4rem; left: 4rem;"
+  class="fixed bg-green-600 hover:bg-green-700 text-white font-extrabold py-10 px-14 rounded-xl text-3xl sm:text-4xl shadow-xl"
+>
+  Home
+</button>
+  </div>
+  

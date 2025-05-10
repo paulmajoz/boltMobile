@@ -54,6 +54,7 @@ export class LoginComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage = 'Login failed. Check your employee number or nationalId.';
+        // this.router.navigate(['/home'], { relativeTo: null });
         console.error('❌ Login failed:', error);
       }
     });

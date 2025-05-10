@@ -1,26 +1,39 @@
-<header class="bg-green-800 text-white py-6 px-6 sm:px-10">
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+<header class="bg-green-800 text-white py-20 px-6 sm:px-12">
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-10 w-full">
+
     <!-- Logo/Title -->
-    <div class="logo-container">
-      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-wide">Membership Portal</h1>
+    <div class="flex items-center gap-6">
+      <img
+        src="assets/umsukaLogoSmall.png"
+        alt="UMSUKA Logo"
+        class="w-20 h-20 object-contain"
+      />
+      <h1 class="text-5xl sm:text-6xl font-extrabold tracking-wide">
+        UMSUKA
+      </h1>
     </div>
 
-    <!-- User Info & Logout -->
-    <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8 w-full sm:w-auto">
-      <div class="user-details text-xl sm:text-2xl">
-        <p class="font-semibold">Welcome, {{ userInfo.firstName }} {{ userInfo.lastName }}</p>
-        <p class="text-green-200">
-          Balance: R{{ userInfo.balance?.toFixed(2) }}
-        </p>
-        
+    <!-- Balance Info (3-column structure) -->
+    <div class="flex flex-row gap-4 sm:gap-8 items-start text-4xl sm:text-4xl ">
+      
+      <!-- Labels -->
+      <div class="flex flex-col text-yellow-300 text-left">
+        <p *ngIf="userInfo.availableAirtime !== undefined">Balance:</p>
+        <p *ngIf="userInfo.amountDue !== undefined">Amount Due:</p>
       </div>
-      <button
-      (click)="logout()"
-      class="bg-white text-green-800 font-bold text-xl sm:text-2xl px-6 py-3 rounded-lg hover:bg-gray-100 transition"
-    >
-      Logout
-    </button>
-    
+
+      <!-- Currency Prefix -->
+      <div class="flex flex-col text-yellow-300 text-right w-6">
+        <p *ngIf="userInfo.availableAirtime !== undefined">R</p>
+        <p *ngIf="userInfo.amountDue !== undefined">R</p>
+      </div>
+
+      <!-- Values -->
+      <div class="flex flex-col text-yellow-300 text-right min-w-[8rem]">
+        <p *ngIf="userInfo.availableAirtime !== undefined">{{ userInfo.availableAirtime.toFixed(2) }}</p>
+        <p *ngIf="userInfo.amountDue !== undefined">{{ userInfo.amountDue.toFixed(2) }}</p>
+      </div>
+
     </div>
   </div>
 </header>

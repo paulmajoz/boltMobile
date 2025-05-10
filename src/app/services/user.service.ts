@@ -44,4 +44,34 @@ export class UserService {
     return this.http.get<any[]>(`${this.apiUrl}/transactions/employee/${employeeNumber}`);
   }
 
+  getAppParam(key: string) {
+    return this.http.get<{ key: string; value: string }>(`${this.apiUrl}/app-params/${key}`);
+  }
+  
+  getUserProfile(employeeNumber: string) {
+    return this.http.get<any>(`${this.apiUrl}/users/${employeeNumber}`);
+  }
+  
+  updateMobileNumbers(employeeNumber: string, mobileNumbers: string[]) {
+    return this.http.post(`${this.apiUrl}/users/update-mobiles/${employeeNumber}`, { mobileNumbers });
+  }
+  
+  updateElectricityMeters(employeeNumber: string, electricityMeters: string[]) {
+    return this.http.post(`${this.apiUrl}/users/update-meters/${employeeNumber}`, { electricityMeters });
+  }
+
+  deleteMobileNumber(employeeNumber: string, numberToDelete: string) {
+    return this.http.post(`${this.apiUrl}/users/delete-mobile/${employeeNumber}`, {
+      numberToDelete,
+    });
+  }
+  
+  deleteElectricityMeter(employeeNumber: string, meterToDelete: string) {
+    return this.http.post(`${this.apiUrl}/users/delete-meter/${employeeNumber}`, {
+      meterToDelete,
+    });
+  }
+  
+  
+
 }

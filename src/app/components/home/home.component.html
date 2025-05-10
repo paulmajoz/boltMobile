@@ -1,16 +1,20 @@
-<div class="home">
+<div class="flex flex-col min-h-screen bg-gray-50">
   <app-header></app-header>
-  
-  <main class="main-content">
-    <div class="menu-grid">
-      <a *ngFor="let item of menuItems" [routerLink]="item.route" class="menu-item">
-        <div class="icon">{{item.icon}}</div>
+
+  <main class="flex-grow px-6 sm:px-10 py-16 flex flex-col items-center">
+    <div class="flex flex-col gap-16 w-full max-w-6xl text-4xl sm:text-5xl">
+      <a *ngFor="let item of menuItems"
+         [routerLink]="item.route"
+         class="w-full bg-white hover:bg-green-100 transition duration-200 rounded-3xl py-16 px-20 shadow-xl border border-gray-300 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-10">
+        
+        <!-- Material Icon -->
+        <i class="material-icons text-8xl text-green-700 sm:mr-10">{{ item.icon }}</i>
+        
         <div>
-          <h3 class="title">{{item.title}}</h3>
-          <p class="description">{{item.description}}</p>
+          <h3 class="font-extrabold text-gray-800 text-5xl mb-4">{{ item.title }}</h3>
+          <p class="text-gray-600 text-3xl">{{ item.description }}</p>
         </div>
       </a>
-      
     </div>
   </main>
 </div>

@@ -1,39 +1,50 @@
-<div class="login-container min-h-screen bg-gray-50 flex items-center justify-center px-6 sm:px-10 py-12">
-  <div class="form-container w-full max-w-xl bg-white shadow-lg rounded-2xl p-8 sm:p-12">
-    <!-- Title -->
-    <div class="mb-10 text-center">
-      <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-800">
-        Sign in to your account
-      </h2>
+<div class="min-h-screen bg-gray-50 flex items-center justify-center px-4 sm:px-10 py-20">
+  <div class="w-full max-w-5xl bg-white shadow-2xl rounded-3xl p-10 sm:p-16">
+    
+    <!-- Logo -->
+    <div class="flex justify-center mb-10">
+      <img src="assets/logo.jpeg" alt="Company Logo" class="h-1000 sm:h-500" />
+
     </div>
 
+    <!-- Title -->
+    <!-- <div class="mb-12 text-center">
+      <h2 class="text-5xl sm:text-6xl font-extrabold text-gray-800">
+        Sign in 
+      </h2>
+    </div> -->
+
     <!-- Login Form -->
-    <form (ngSubmit)="onSubmit()" class="flex flex-col gap-8 text-xl sm:text-2xl">
+    <form (ngSubmit)="onSubmit()" class="flex flex-col gap-12 text-3xl sm:text-4xl">
       <!-- Employee Number -->
-      <div class="flex flex-col gap-3">
-        <label for="employeeNumber" class="text-lg sm:text-xl font-semibold text-gray-700">Employee Number</label>
+      <div class="flex flex-col gap-4">
+        <label for="employeeNumber" class="text-3xl font-semibold text-gray-700">
+          Employee Number
+        </label>
         <input
           id="employeeNumber"
           name="employeeNumber"
           type="text"
           [(ngModel)]="employeeNumber"
           required
-          class="w-full border-2 border-gray-300 rounded-xl px-6 py-5 text-xl sm:text-2xl"
-          placeholder="Enter your employee number"
+          class="w-full border-4 border-gray-300 rounded-2xl px-12 py-8 text-3xl"
+          placeholder="Employee number"
         />
       </div>
 
-      <!-- nationalId -->
-      <div class="flex flex-col gap-3">
-        <label for="nationalId" class="text-lg sm:text-xl font-semibold text-gray-700">nationalId</label>
+      <!-- National ID -->
+      <div class="flex flex-col gap-4">
+        <label for="nationalId" class="text-3xl font-semibold text-gray-700">
+          National ID
+        </label>
         <input
           id="nationalId"
           name="nationalId"
-          type="nationalId"
+          type="text"
           [(ngModel)]="nationalId"
           required
-          class="w-full border-2 border-gray-300 rounded-xl px-6 py-5 text-xl sm:text-2xl"
-          placeholder="Enter your nationalId"
+          class="w-full border-4 border-gray-300 rounded-2xl px-12 py-8 text-3xl"
+          placeholder="National ID"
         />
       </div>
 
@@ -41,14 +52,14 @@
       <div>
         <button
           type="submit"
-          class="w-full bg-green-600 hover:bg-green-700 text-white font-bold text-2xl sm:text-3xl py-5 px-8 rounded-xl transition duration-200"
+          class="w-full bg-green-600 hover:bg-green-700 text-white font-extrabold text-4xl py-8 px-12 rounded-2xl transition duration-200"
         >
           Sign in
         </button>
       </div>
 
       <!-- Error Message -->
-      <div *ngIf="errorMessage" class="text-red-600 text-center font-semibold mt-4">
+      <div *ngIf="errorMessage" class="text-red-600 text-center font-semibold mt-6 text-2xl">
         {{ errorMessage }}
       </div>
     </form>
