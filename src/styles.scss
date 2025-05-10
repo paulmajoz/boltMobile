@@ -22,14 +22,14 @@ body {
   }
 }
 #toast-container > div {
-  font-size: 22px !important;       // Bigger, bolder text
-  font-weight: 600 !important;      // Slightly heavier font
-  padding: 28px 35px !important;    // Spacious padding
-  border-radius: 12px !important;   // Softer corners
-  min-width: 420px !important;      // Wider default width
-  max-width: 640px !important;      // Maximum toast width
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2) !important; // More visible shadow
-  line-height: 1.6 !important;      // Better vertical spacing
+  font-size: 0.875rem !important;         // ~14px
+  font-weight: 500 !important;
+  padding: 12px 16px !important;
+  border-radius: 8px !important;
+  min-width: 280px !important;
+  max-width: 360px !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15) !important;
+  line-height: 1.4 !important;
 }
 
 

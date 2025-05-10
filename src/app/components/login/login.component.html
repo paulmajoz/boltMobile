@@ -1,24 +1,16 @@
 <div class="min-h-screen bg-gray-50 flex items-center justify-center px-4 sm:px-10 py-20">
-  <div class="w-full max-w-5xl bg-white shadow-2xl rounded-3xl p-10 sm:p-16">
+  <div class="w-full max-w-5xl bg-white shadow-2xl rounded-3xl p-6 sm:p-16">
     
     <!-- Logo -->
     <div class="flex justify-center mb-10">
-      <img src="assets/logo.jpeg" alt="Company Logo" class="h-1000 sm:h-500" />
-
+      <img src="assets/logo.jpeg" alt="Company Logo" class="h-28 sm:h-40" />
     </div>
 
-    <!-- Title -->
-    <!-- <div class="mb-12 text-center">
-      <h2 class="text-5xl sm:text-6xl font-extrabold text-gray-800">
-        Sign in 
-      </h2>
-    </div> -->
-
     <!-- Login Form -->
-    <form (ngSubmit)="onSubmit()" class="flex flex-col gap-12 text-3xl sm:text-4xl">
+    <form (ngSubmit)="onSubmit()" class="flex flex-col gap-10 text-xl sm:text-3xl">
       <!-- Employee Number -->
-      <div class="flex flex-col gap-4">
-        <label for="employeeNumber" class="text-3xl font-semibold text-gray-700">
+      <div class="flex flex-col gap-3">
+        <label for="employeeNumber" class="text-base sm:text-2xl font-semibold text-gray-700">
           Employee Number
         </label>
         <input
@@ -27,14 +19,14 @@
           type="text"
           [(ngModel)]="employeeNumber"
           required
-          class="w-full border-4 border-gray-300 rounded-2xl px-12 py-8 text-3xl"
+          class="w-full border-2 border-gray-300 rounded-xl px-6 py-4 text-base sm:text-2xl"
           placeholder="Employee number"
         />
       </div>
 
       <!-- National ID -->
-      <div class="flex flex-col gap-4">
-        <label for="nationalId" class="text-3xl font-semibold text-gray-700">
+      <div class="flex flex-col gap-3">
+        <label for="nationalId" class="text-base sm:text-2xl font-semibold text-gray-700">
           National ID
         </label>
         <input
@@ -43,7 +35,7 @@
           type="text"
           [(ngModel)]="nationalId"
           required
-          class="w-full border-4 border-gray-300 rounded-2xl px-12 py-8 text-3xl"
+          class="w-full border-2 border-gray-300 rounded-xl px-6 py-4 text-base sm:text-2xl"
           placeholder="National ID"
         />
       </div>
@@ -52,14 +44,14 @@
       <div>
         <button
           type="submit"
-          class="w-full bg-green-600 hover:bg-green-700 text-white font-extrabold text-4xl py-8 px-12 rounded-2xl transition duration-200"
+          class="w-full bg-green-600 hover:bg-green-700 text-white font-extrabold text-xl sm:text-3xl py-5 sm:py-6 px-8 rounded-xl transition duration-200"
         >
           Sign in
         </button>
       </div>
 
       <!-- Error Message -->
-      <div *ngIf="errorMessage" class="text-red-600 text-center font-semibold mt-6 text-2xl">
+      <div *ngIf="errorMessage" class="text-red-600 text-center font-semibold mt-4 text-base sm:text-2xl">
         {{ errorMessage }}
       </div>
     </form>

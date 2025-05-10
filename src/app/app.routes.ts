@@ -19,10 +19,10 @@ export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'home', component: HomeComponent },
-  { path: 'dashboard', component: DashboardComponent },
-  { path: 'profile', component: ProfileComponent },
+  // { path: 'dashboard', component: DashboardComponent },
+  // { path: 'profile', component: ProfileComponent },
   { path: 'transactions', component: TransactionsComponent },
-  { path: 'settings', component: SettingsComponent },
+  // { path: 'settings', component: SettingsComponent },
   { path: 'airtime', component: AirtimeComponent },
   { path: 'data', component: DataComponent },
   { path: 'electricity', component: ElectricityComponent }

@@ -19,3 +19,18 @@ body {
 .btn-primary {
   @apply bg-primary text-white hover:bg-opacity-90;
 }
+
+
+.toast-container .ngx-toastr {
+  font-size: 0.875rem;  
+  padding: 10px 16px;
+  border-radius: 10px;
+}
+
+.toast-title {
+  font-size: 1rem; 
+}
+
+.toast-message {
+  font-size: 0.875rem;
+}

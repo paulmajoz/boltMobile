@@ -1,76 +1,81 @@
 <div class="data-page min-h-screen bg-gray-50">
   <app-header></app-header>
 
-  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="bg-white shadow-md rounded-lg p-6 sm:p-8">
-      <h3 class="text-3xl font-semibold text-secondary mb-6">Purchase Data</h3>
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="bg-white shadow-md rounded-lg p-4 sm:p-6">
+      <h3 class="text-lg sm:text-2xl font-semibold text-secondary mb-4">Purchase Data</h3>
 
       <!-- Saved Mobile Numbers -->
-      <section class="mb-8">
-        <h3 class="font-bold mb-6 text-3xl sm:text-4xl">Saved Mobile Numbers</h3>
+      <section class="mb-6">
+        <h3 class="font-bold mb-3 text-sm sm:text-xl">Saved Mobile Numbers</h3>
 
         <!-- Add Form -->
-        <div class="grid grid-cols-[1fr_auto] gap-6 items-center mb-10">
+        <div class="flex flex-col sm:flex-row gap-3 items-center mb-5">
           <input
             [(ngModel)]="newMobile"
             placeholder="Add new mobile number"
-            class="border-2 border-gray-300 rounded-xl px-8 py-6 text-2xl sm:text-3xl w-full"
+            class="border-2 border-gray-300 rounded-xl px-3 py-2 text-sm sm:text-base w-full sm:flex-1"
           />
           <button
             (click)="addMobile()"
-            class="bg-green-600 hover:bg-green-700 text-white font-bold py-6 px-10 rounded-xl text-2xl sm:text-3xl w-full sm:w-auto min-w-[160px]"
+            class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-xl text-sm sm:text-base w-full sm:w-auto sm:min-w-[100px]"
           >
             Add
           </button>
         </div>
 
         <!-- Mobile List -->
-        <div class="space-y-6 text-2xl sm:text-3xl">
+        <div class="space-y-3 text-sm sm:text-base">
           <div
             *ngFor="let mobile of mobileNumbers"
-            class="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] items-center bg-gray-50 p-4 rounded-xl shadow gap-4"
+            class="flex justify-between items-center bg-gray-50 p-3 sm:p-4 rounded-xl shadow gap-3"
           >
-            <span class="break-words">{{ mobile }}</span>
+            <!-- Mobile Number -->
+            <span class="break-words text-left flex-1">
+              {{ mobile }}
+            </span>
 
-            <!-- Delete Button -->
-            <button
-              (click)="deleteMobile(mobile)"
-              class="bg-red-600 hover:bg-red-700 text-white font-bold py-6 px-10 rounded-xl w-full sm:w-auto min-w-[140px]"
-            >
-              Delete
-            </button>
-
-            <!-- Select Button -->
-            <button
-              (click)="selectMobile(mobile)"
-              class="bg-green-600 hover:bg-green-700 text-white font-bold py-6 px-10 rounded-xl w-full sm:w-auto min-w-[140px]"
-            >
-              Select
-            </button>
+            <!-- Buttons -->
+            <div class="flex gap-2">
+              <button
+                (click)="deleteMobile(mobile)"
+                class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded text-xs sm:text-sm"
+              >
+                Delete
+              </button>
+              <button
+                (click)="selectMobile(mobile)"
+                class="bg-green-600 hover:bg-green-700 text-white font-bold py-1.5 px-3 rounded text-xs sm:text-sm"
+              >
+                Select
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
       <!-- Data Purchase Form -->
-      <form (ngSubmit)="purchaseData()" class="flex flex-col gap-10 text-2xl sm:text-3xl">
-        <div>
-          <label for="dataProduct" class="block text-2xl sm:text-3xl font-bold mb-4">Select Data Product:</label>
+      <form (ngSubmit)="purchaseData()" class="flex flex-col gap-4 text-sm sm:text-base">
+        <!-- Product Select -->
+        <div class="mb-2">
+          <label for="dataProduct" class="block font-bold mb-1">Select Data Product:</label>
           <select
             id="dataProduct"
             [(ngModel)]="selectedDataProduct"
             name="dataProduct"
             required
             (change)="onProductChange()"
-            class="w-full border-2 border-gray-300 rounded-xl px-8 py-6 text-2xl sm:text-3xl"
+            class="w-full border-2 border-gray-300 rounded-xl px-3 py-2"
           >
             <option *ngFor="let product of dataProducts" [ngValue]="product">
               {{ product.product_description }} - R{{ product.product_value }}
             </option>
           </select>
         </div>
-      
-        <div>
-          <label for="dataMobileNumber" class="block text-2xl sm:text-3xl font-bold mb-4">Mobile Number:</label>
+
+        <!-- Mobile Input -->
+        <div class="mb-2">
+          <label for="dataMobileNumber" class="block font-bold mb-1">Mobile Number:</label>
           <input
             type="text"
             id="dataMobileNumber"
@@ -78,25 +83,26 @@
             name="dataMobileNumber"
             inputmode="numeric"
             required
-            class="w-full border-2 border-gray-300 rounded-xl px-8 py-6 text-2xl sm:text-3xl"
+            class="w-full border-2 border-gray-300 rounded-xl px-3 py-2"
           />
         </div>
-      
-        <div>
-          <label for="dataAmount" class="block text-2xl sm:text-3xl font-bold mb-4">Amount:</label>
+
+        <!-- Amount Input -->
+        <div class="mb-2">
+          <label for="dataAmount" class="block font-bold mb-1">Amount:</label>
           <div class="relative w-full">
-            <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-2xl sm:text-3xl text-gray-500">R</span>
+            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">R</span>
             <input
               type="number"
               id="dataAmount"
               [(ngModel)]="dataInputValue"
               name="dataAmount"
               required
-              class="w-full border-2 border-gray-300 rounded-xl pl-14 pr-8 py-6 text-2xl sm:text-3xl"
+              class="w-full border-2 border-gray-300 rounded-xl pl-8 pr-4 py-2"
             />
           </div>
         </div>
-      
+
         <!-- Submit Button -->
         <button
           type="submit"
@@ -107,20 +113,20 @@
             dataInputValue > availableAirtimeLimit || 
             isLoading
           "
-          class="bg-green-600 hover:bg-green-700 text-white font-extrabold py-6 px-10 rounded-xl text-2xl sm:text-3xl w-full"
+          class="bg-green-600 hover:bg-green-700 text-white font-extrabold py-3 px-5 rounded-xl text-sm sm:text-base w-full"
         >
           <span *ngIf="!isLoading">Buy Data</span>
           <span *ngIf="isLoading">Processing...</span>
         </button>
 
         <!-- Low Balance Warning -->
-        <p class="text-red-600 font-semibold" *ngIf="dataInputValue > availableAirtimeLimit">
+        <p class="text-red-600 font-semibold text-xs sm:text-sm" *ngIf="dataInputValue > availableAirtimeLimit">
           You do not have enough funds available.
         </p>
 
         <!-- Spinner -->
-        <div *ngIf="isLoading" class="flex justify-center items-center mt-10">
-          <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-green-600 border-solid"></div>
+        <div *ngIf="isLoading" class="flex justify-center items-center mt-4">
+          <div class="animate-spin rounded-full h-8 w-8 border-t-4 border-green-600 border-solid"></div>
         </div>
       </form>
     </div>
@@ -129,8 +135,8 @@
   <!-- Home Button -->
   <button
     (click)="goHome()"
-    style="bottom: 3rem; left: 4rem;"
-    class="fixed bg-green-600 hover:bg-green-700 text-white font-extrabold py-10 px-14 rounded-xl text-3xl sm:text-4xl shadow-xl"
+    style="bottom: 1.5rem; left: 1.5rem;"
+    class="fixed bg-green-600 hover:bg-green-700 text-white font-extrabold py-4 px-6 rounded-xl text-sm sm:text-2xl shadow-xl"
   >
     Home
   </button>

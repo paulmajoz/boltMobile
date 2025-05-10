@@ -1,80 +1,82 @@
 <div class="min-h-screen bg-gray-50 flex flex-col">
   <app-header></app-header>
 
-  <main class="flex-1 p-6 sm:p-10">
+  <main class="flex-1 p-4 sm:p-10">
     <!-- Electricity Meters -->
-    <div class="mb-20">
+    <div class="mb-8">
       <section>
-        <h3 class="font-bold mb-6 text-3xl sm:text-4xl">Saved Electricity Meter Numbers</h3>
+        <h3 class="font-bold mb-4 text-sm sm:text-2xl">Saved Electricity Meter Numbers</h3>
 
         <!-- Add Form -->
-        <div class="grid grid-cols-[1fr_auto] gap-6 items-center mb-10">
+        <div class="flex flex-col sm:flex-row gap-3 items-center mb-5">
           <input
             [(ngModel)]="newMeter"
             placeholder="Add new meter"
-            class="border-2 border-gray-300 rounded-xl px-8 py-6 text-2xl sm:text-3xl w-full"
+            class="border-2 border-gray-300 rounded-xl px-3 py-2 text-sm sm:text-base w-full sm:flex-1"
           />
           <button
             (click)="addMeter()"
-            class="bg-green-600 hover:bg-green-700 text-white font-bold py-6 px-10 rounded-xl text-2xl sm:text-3xl w-full sm:w-auto min-w-[160px]"
+            class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-xl text-sm sm:text-base w-full sm:w-auto sm:min-w-[100px]"
           >
             Add
           </button>
         </div>
 
         <!-- Meter List -->
-        <div class="space-y-6 text-2xl sm:text-3xl">
+        <div class="space-y-3 text-sm sm:text-base">
           <div
             *ngFor="let meter of electricityMeters"
-            class="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] items-center bg-white p-4 rounded-xl shadow gap-4"
+            class="flex justify-between items-center bg-white p-3 rounded-xl shadow gap-3"
           >
-            <span class="break-words">{{ meter }}</span>
+            <span class="break-words text-left flex-1">{{ meter }}</span>
 
-            <!-- Delete Button -->
-            <button
-              (click)="deleteMeter(meter)"
-              class="bg-red-600 hover:bg-red-700 text-white font-bold py-6 px-10 rounded-xl w-full sm:w-auto min-w-[140px]"
-            >
-              Delete
-            </button>
-            <!-- Select Button -->
-            <button
-              (click)="selectMeter(meter)"
-              class="bg-green-600 hover:bg-green-700 text-white font-bold py-6 px-10 rounded-xl w-full sm:w-auto min-w-[140px]"
-            >
-              Select
-            </button>
+            <!-- Buttons -->
+            <div class="flex gap-2">
+              <button
+                (click)="deleteMeter(meter)"
+                class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded text-xs sm:text-sm"
+              >
+                Delete
+              </button>
+              <button
+                (click)="selectMeter(meter)"
+                class="bg-green-600 hover:bg-green-700 text-white font-bold py-1.5 px-3 rounded text-xs sm:text-sm"
+              >
+                Select
+              </button>
+            </div>
           </div>
         </div>
       </section>
     </div>
 
-    <h3 class="text-4xl font-bold text-secondary mb-10">Purchase Electricity</h3>
+    <!-- Purchase Form -->
+    <h3 class="text-sm sm:text-2xl font-bold text-secondary mb-4">Purchase Electricity</h3>
 
-    <form (ngSubmit)="purchaseElectricity()" class="flex flex-col gap-10 text-2xl sm:text-3xl">
+    <form (ngSubmit)="purchaseElectricity()" class="flex flex-col gap-4 text-sm sm:text-base">
       <!-- Meter Number -->
-      <div>
-        <label class="block mb-4 font-bold">Meter Number:</label>
+      <div class="mb-2">
+        <label class="block mb-1 font-bold">Meter Number:</label>
         <input
           type="text"
           [(ngModel)]="meterNumber"
           name="meterNumber"
           required
-          class="w-full border-2 border-gray-300 rounded-xl px-8 py-6"
+          class="w-full border-2 border-gray-300 rounded-xl px-3 py-2"
         />
       </div>
 
-      <!-- Amount in Rands -->
-      <div>
-        <label class="block mb-4 font-bold">Amount:</label>
+      <!-- Amount -->
+      <div class="mb-2">
+        <label class="block mb-1 font-bold">Amount:</label>
         <div class="relative w-full">
-          <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-2xl sm:text-3xl text-gray-500">R</span>
+          <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">R</span>
           <input
             type="number"
             [(ngModel)]="amountInRands"
             name="amountInRands"
             required
-            class="w-full border-2 border-gray-300 rounded-xl pl-14 pr-8 py-6 text-2xl sm:text-3xl"
+            class="w-full border-2 border-gray-300 rounded-xl pl-8 pr-4 py-2"
           />
         </div>
       </div>
@@ -88,31 +90,31 @@
           amountInRands > availableAirtimeLimit || 
           isLoading
         "
-        class="bg-green-600 hover:bg-green-700 text-white font-extrabold py-6 px-10 rounded-xl w-full"
+        class="bg-green-600 hover:bg-green-700 text-white font-extrabold py-3 px-5 rounded-xl text-sm sm:text-base w-full"
       >
         <span *ngIf="!isLoading">Buy Electricity</span>
         <span *ngIf="isLoading">Processing...</span>
       </button>
 
       <!-- Low Balance Warning -->
-      <p class="text-red-600 font-semibold" *ngIf="amountInRands > availableAirtimeLimit">
+      <p class="text-red-600 font-semibold text-xs sm:text-sm" *ngIf="amountInRands > availableAirtimeLimit">
         You do not have enough funds available.
       </p>
     </form>
 
     <!-- Spinner -->
-    <div *ngIf="isLoading" class="flex justify-center items-center mt-10">
-      <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-green-600 border-solid"></div>
+    <div *ngIf="isLoading" class="flex justify-center items-center mt-4">
+      <div class="animate-spin rounded-full h-8 w-8 border-t-4 border-green-600 border-solid"></div>
     </div>
 
     <!-- Token Display -->
-    <div *ngIf="token" class="mt-10 bg-white shadow-md rounded-xl p-6 border-2 border-green-500">
-      <h4 class="text-3xl font-bold text-green-700 mb-4">Token Received</h4>
-      <div class="flex items-center justify-between">
-        <span class="text-xl break-all">{{ token }}</span>
+    <div *ngIf="token" class="mt-6 bg-white shadow-md rounded-xl p-4 border-2 border-green-500">
+      <h4 class="text-sm sm:text-2xl font-bold text-green-700 mb-3">Token Received</h4>
+      <div class="flex items-center justify-between gap-4">
+        <span class="text-xs sm:text-base break-all">{{ token }}</span>
         <button
           (click)="copyTokenToClipboard()"
-          class="ml-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-xl"
+          class="bg-green-600 hover:bg-green-700 text-white font-bold py-1.5 px-3 rounded text-xs sm:text-sm"
         >
           Copy Token
         </button>
@@ -123,8 +125,8 @@
   <!-- Home Button -->
   <button
     (click)="goHome()"
-    style="bottom: 4rem; left: 4rem;"
-    class="fixed bg-green-600 hover:bg-green-700 text-white font-extrabold py-10 px-14 rounded-xl text-3xl sm:text-4xl shadow-xl"
+    style="bottom: 1rem; left: 1rem;"
+    class="fixed bg-green-600 hover:bg-green-700 text-white font-extrabold py-4 px-6 rounded-xl text-sm sm:text-2xl shadow-xl"
   >
     Home
   </button>
