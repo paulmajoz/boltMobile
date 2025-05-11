@@ -29,12 +29,7 @@
           *ngFor="let mobile of mobileNumbers"
           class="flex justify-between items-center bg-white p-3 rounded-xl shadow gap-3"
         >
-          <!-- Mobile Number -->
-          <span class="break-words text-left flex-1">
-            {{ mobile }}
-          </span>
-
-          <!-- Buttons -->
+          <span class="break-words text-left flex-1">{{ mobile }}</span>
           <div class="flex gap-2">
             <button
               (click)="deleteMobile(mobile)"
@@ -54,14 +49,13 @@
     </section>
 
     <!-- Airtime Purchase Form -->
-    <form (ngSubmit)="purchaseAirtime()" class="flex flex-col gap-4 text-sm sm:text-base">
+    <form [formGroup]="airtimeForm" (ngSubmit)="purchaseAirtime()" class="flex flex-col gap-4 text-sm sm:text-base">
       <!-- Product Select -->
       <div>
         <label for="airtimeProduct" class="block font-bold mb-1">Select Airtime Product:</label>
         <select
           id="airtimeProduct"
-          [(ngModel)]="selectedAirtimeProduct"
-          name="airtimeProduct"
+          formControlName="airtimeProduct"
           required
           class="w-full border-2 border-gray-300 rounded-xl px-3 py-2"
         >
@@ -75,14 +69,15 @@
       <div>
         <label for="airtimeMobileNumber" class="block font-bold mb-1">Mobile Number:</label>
         <input
-          type="text"
           id="airtimeMobileNumber"
-          [(ngModel)]="airtimeMobileNumber"
-          name="airtimeMobileNumber"
+          type="text"
           inputmode="numeric"
-          required
+          formControlName="airtimeMobileNumber"
           class="w-full border-2 border-gray-300 rounded-xl px-3 py-2"
         />
+        <p *ngIf="airtimeForm.get('airtimeMobileNumber')?.touched && airtimeForm.get('airtimeMobileNumber')?.invalid" class="text-red-600 text-xs mt-1">
+          Mobile number must be exactly 10 digits.
+        </p>
       </div>
 
       <!-- Amount Input -->
@@ -91,36 +86,26 @@
         <div class="relative w-full">
           <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">R</span>
           <input
-            type="number"
             id="airtimeAmount"
-            [(ngModel)]="airtimeInputValue"
-            name="airtimeAmount"
-            required
+            type="number"
+            formControlName="airtimeAmount"
             class="w-full border-2 border-gray-300 rounded-xl pl-8 pr-4 py-2"
           />
         </div>
+        <p *ngIf="airtimeForm.get('airtimeAmount')?.touched && airtimeForm.get('airtimeAmount')?.invalid" class="text-red-600 text-xs mt-1">
+          Minimum amount is R2.
+        </p>
       </div>
 
       <!-- Submit Button -->
       <button
         type="submit"
-        [disabled]="
-          !selectedAirtimeProduct || 
-          !airtimeMobileNumber || 
-          !airtimeInputValue || 
-          airtimeInputValue > availableAirtimeLimit || 
-          isLoading
-        "
+        [disabled]="airtimeForm.invalid || isLoading"
         class="bg-green-600 hover:bg-green-700 text-white font-extrabold py-3 px-5 rounded-xl text-sm sm:text-base w-full"
       >
         <span *ngIf="!isLoading">Buy Airtime</span>
         <span *ngIf="isLoading">Processing...</span>
       </button>
-
-      <!-- Low Balance Warning -->
-      <p class="text-red-600 font-semibold text-xs sm:text-sm" *ngIf="airtimeInputValue > availableAirtimeLimit">
-        You do not have enough funds available.
-      </p>
 
       <!-- Spinner -->
       <div *ngIf="isLoading" class="flex justify-center items-center mt-4">

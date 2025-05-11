@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from '../header/header.component';
 import { PurchaseService } from '../../services/purchase.service';
@@ -10,24 +11,21 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-airtime',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, HeaderComponent],
   templateUrl: './airtime.component.html',
   styleUrls: ['./airtime.component.scss']
 })
 export class AirtimeComponent implements OnInit {
+  airtimeForm!: FormGroup;
   airtimeProducts: any[] = [];
-  selectedAirtimeProduct: any;
-  airtimeMobileNumber = '';
-  airtimeInputValue = 0;
-  availableAirtimeLimit = 0;
-  buttonDisabled = false;
-  isLoading = false;
-
   mobileNumbers: string[] = [];
   newMobile = '';
+  availableAirtimeLimit = 0;
   employeeNumber = '';
+  isLoading = false;
 
   constructor(
+    private fb: FormBuilder,
     private purchaseService: PurchaseService,
     private userService: UserService,
     private toastr: ToastrService,
@@ -37,6 +35,12 @@ export class AirtimeComponent implements OnInit {
   ngOnInit(): void {
     this.employeeNumber = localStorage.getItem('employeeNumber') || '';
     if (!this.employeeNumber) return;
+
+    this.airtimeForm = this.fb.group({
+      airtimeProduct: [null, Validators.required],
+      airtimeMobileNumber: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
+      airtimeAmount: [null, [Validators.required, Validators.min(2)]]
+    });
 
     this.fetchAirtimeProducts();
     this.loadMobileNumbers();
@@ -48,7 +52,7 @@ export class AirtimeComponent implements OnInit {
       next: (response) => {
         if (response.success && response.product_list.length > 0) {
           this.airtimeProducts = response.product_list;
-          this.selectedAirtimeProduct = this.airtimeProducts[0];
+          this.airtimeForm.patchValue({ airtimeProduct: response.product_list[0] });
         }
       },
       error: () => this.toastr.error('Failed to load airtime products', 'Error')
@@ -66,7 +70,6 @@ export class AirtimeComponent implements OnInit {
 
   calculateAvailableLimit(): void {
     let closingBalance = 0;
-
     const fetchLimit = () => {
       this.userService.getAppParam('airtimeLimit').subscribe({
         next: (paramData) => {
@@ -90,18 +93,20 @@ export class AirtimeComponent implements OnInit {
   }
 
   purchaseAirtime(): void {
-    if (!this.selectedAirtimeProduct || !this.airtimeMobileNumber || !this.airtimeInputValue) {
-      this.toastr.warning('Please complete all fields.', 'Missing Info');
+    if (this.airtimeForm.invalid) {
+      this.airtimeForm.markAllAsTouched();
+      this.toastr.warning('Please correct the form before submitting.', 'Invalid Input');
       return;
     }
 
-    this.buttonDisabled = true;
+    const { airtimeProduct, airtimeMobileNumber, airtimeAmount } = this.airtimeForm.value;
+    const amountInCents = airtimeAmount * 100;
+
     this.isLoading = true;
-    const amountInCents = this.airtimeInputValue * 100;
 
     this.purchaseService.purchaseAirtime(
-      this.selectedAirtimeProduct.product_code,
-      this.airtimeMobileNumber,
+      airtimeProduct.product_code,
+      airtimeMobileNumber,
       amountInCents
     ).subscribe({
       next: (response) => {
@@ -116,7 +121,6 @@ export class AirtimeComponent implements OnInit {
         this.toastr.error('Airtime purchase failed. Please try again.', 'Error');
       },
       complete: () => {
-        this.buttonDisabled = false;
         this.isLoading = false;
       }
     });
@@ -138,7 +142,7 @@ export class AirtimeComponent implements OnInit {
   }
 
   selectMobile(mobile: string): void {
-    this.airtimeMobileNumber = mobile;
+    this.airtimeForm.patchValue({ airtimeMobileNumber: mobile });
     this.toastr.success('Mobile selected!', 'Selected');
   }
 

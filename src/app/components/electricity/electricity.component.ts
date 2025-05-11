@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HeaderComponent } from '../header/header.component';
 import { PurchaseService } from '../../services/purchase.service';
 import { ToastrService } from 'ngx-toastr';
@@ -10,35 +10,22 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-electricity',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, HeaderComponent],
   templateUrl: './electricity.component.html',
   styleUrls: ['./electricity.component.scss']
 })
 export class ElectricityComponent implements OnInit {
+  electricityForm!: FormGroup;
   electricityProducts: any[] = [];
-  selectedElectricityProduct: any = {
-    product_type: 'electricity',
-    product_list_hash: '',
-    product_code: '44',
-    product_description: 'Buy Electricity',
-    product_category: 'Electricity',
-    product_value: '0.0'
-  };
-
-  meterNumber = '';
-  amountInRands = 0;
-  customReference = '';
   token: string | null = null;
-
   availableAirtimeLimit = 0;
   employeeNumber = '';
-  mobileNumbers: string[] = [];
   electricityMeters: string[] = [];
-  newMobile = '';
   newMeter = '';
   isLoading = false;
 
   constructor(
+    private fb: FormBuilder,
     private readonly purchaseService: PurchaseService,
     private readonly userService: UserService,
     private readonly toastr: ToastrService,
@@ -48,6 +35,13 @@ export class ElectricityComponent implements OnInit {
   ngOnInit(): void {
     this.employeeNumber = localStorage.getItem('employeeNumber') || '';
     if (!this.employeeNumber) return;
+
+    this.electricityForm = this.fb.group({
+      selectedElectricityProduct: [null, Validators.required],
+      meterNumber: ['', [Validators.required]],
+      amountInRands: [null, [Validators.required, Validators.min(2)]],
+      customReference: ['']
+    });
 
     this.loadProfileData();
     this.fetchElectricityProducts();
@@ -59,28 +53,28 @@ export class ElectricityComponent implements OnInit {
       next: (response) => {
         if (response.success && response.product_list.length > 0) {
           this.electricityProducts = response.product_list;
-          this.selectedElectricityProduct = response.product_list[0];
+          this.electricityForm.patchValue({ selectedElectricityProduct: response.product_list[0] });
         }
       },
-      error: () => {
-        this.toastr.error('Failed to load electricity products', 'Error');
-      }
+      error: () => this.toastr.error('Failed to load electricity products', 'Error')
     });
   }
 
   async purchaseElectricity(): Promise<void> {
-    if (!this.selectedElectricityProduct || !this.meterNumber || !this.amountInRands) {
-      this.toastr.warning('Please fill in all required fields.', 'Incomplete Form');
+    if (this.electricityForm.invalid) {
+      this.electricityForm.markAllAsTouched();
+      this.toastr.warning('Please correct the form before submitting.', 'Invalid Input');
       return;
     }
 
-    this.isLoading = true;
+    const { selectedElectricityProduct, meterNumber, amountInRands, customReference } = this.electricityForm.value;
 
+    this.isLoading = true;
     try {
       const result = await this.purchaseService.purchaseElectricity(
-        this.meterNumber,
-        this.amountInRands * 100,
-        this.customReference
+        meterNumber,
+        amountInRands * 100,
+        customReference
       );
 
       const token = result?.transactionResponse?.data?.elec_data?.std_tokens?.[0]?.code;
@@ -92,7 +86,7 @@ export class ElectricityComponent implements OnInit {
       } else {
         this.toastr.warning('No token received in response.', 'Missing Token');
       }
-    } catch (error) {
+    } catch {
       this.toastr.error('Electricity purchase failed. Please try again.', 'Error');
     } finally {
       this.isLoading = false;
@@ -101,7 +95,6 @@ export class ElectricityComponent implements OnInit {
 
   calculateAvailableLimit(): void {
     let closingBalance = 0;
-
     const fetchLimit = () => {
       this.userService.getAppParam('airtimeLimit').subscribe({
         next: (paramData) => {
@@ -127,12 +120,9 @@ export class ElectricityComponent implements OnInit {
   loadProfileData(): void {
     this.userService.getUserProfile(this.employeeNumber).subscribe({
       next: (user) => {
-        this.mobileNumbers = user.mobileNumbers || [];
         this.electricityMeters = user.electricityMeters || [];
       },
-      error: () => {
-        this.toastr.error('Failed to load profile data', 'Error');
-      }
+      error: () => this.toastr.error('Failed to load profile data', 'Error')
     });
   }
 
@@ -152,7 +142,7 @@ export class ElectricityComponent implements OnInit {
   }
 
   selectMeter(meter: string): void {
-    this.meterNumber = meter;
+    this.electricityForm.patchValue({ meterNumber: meter });
     this.toastr.success('Meter selected!', 'Selected');
   }
 

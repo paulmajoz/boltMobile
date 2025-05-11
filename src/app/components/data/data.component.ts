@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from '../header/header.component';
 import { PurchaseService } from '../../services/purchase.service';
@@ -10,31 +11,36 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-data',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, HeaderComponent],
   templateUrl: './data.component.html',
   styleUrls: ['./data.component.scss']
 })
 export class DataComponent implements OnInit {
+  dataForm!: FormGroup;
   dataProducts: any[] = [];
-  selectedDataProduct: any;
-  dataMobileNumber = '';
-  dataInputValue = 0;
-  availableAirtimeLimit = 0;
   mobileNumbers: string[] = [];
   newMobile = '';
   employeeNumber = '';
+  availableAirtimeLimit = 0;
   isLoading = false;
 
   constructor(
-    private readonly purchaseService: PurchaseService,
-    private readonly userService: UserService,
-    private readonly toastr: ToastrService,
-    private readonly router: Router
+    private fb: FormBuilder,
+    private purchaseService: PurchaseService,
+    private userService: UserService,
+    private toastr: ToastrService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.employeeNumber = localStorage.getItem('employeeNumber') || '';
     if (!this.employeeNumber) return;
+
+    this.dataForm = this.fb.group({
+      dataProduct: [null, Validators.required],
+      dataMobileNumber: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
+      dataAmount: [null, [Validators.required, Validators.min(1)]]
+    });
 
     this.fetchDataProducts();
     this.loadMobileNumbers();
@@ -46,8 +52,10 @@ export class DataComponent implements OnInit {
       next: (response) => {
         if (response.success && response.product_list.length > 0) {
           this.dataProducts = response.product_list;
-          this.selectedDataProduct = this.dataProducts[0];
-          this.dataInputValue = this.dataProducts[0].product_value;
+          this.dataForm.patchValue({
+            dataProduct: this.dataProducts[0],
+            dataAmount: this.dataProducts[0].product_value
+          });
         } else {
           this.toastr.warning('No data products available.', 'Warning');
         }
@@ -69,7 +77,6 @@ export class DataComponent implements OnInit {
 
   calculateAvailableLimit(): void {
     let closingBalance = 0;
-
     const fetchLimit = () => {
       this.userService.getAppParam('airtimeLimit').subscribe({
         next: (paramData) => {
@@ -93,26 +100,25 @@ export class DataComponent implements OnInit {
   }
 
   onProductChange(): void {
-    if (this.selectedDataProduct) {
-      this.dataInputValue = this.selectedDataProduct.product_value;
+    const selected = this.dataForm.get('dataProduct')?.value;
+    if (selected) {
+      this.dataForm.patchValue({ dataAmount: selected.product_value });
     }
   }
 
   purchaseData(): void {
-    if (!this.selectedDataProduct || !this.dataMobileNumber || !this.dataInputValue) {
-      this.toastr.warning('Please enter all fields to proceed.', 'Incomplete Form');
+    if (this.dataForm.invalid) {
+      this.dataForm.markAllAsTouched();
+      this.toastr.warning('Please complete the form correctly.', 'Validation Error');
       return;
     }
 
+    const { dataProduct, dataMobileNumber, dataAmount } = this.dataForm.value;
+    const amountInCents = dataAmount * 100;
+
     this.isLoading = true;
 
-    const amountInCents = this.dataInputValue * 100;
-
-    this.purchaseService.purchaseData(
-      this.selectedDataProduct.product_code,
-      this.dataMobileNumber,
-      amountInCents
-    ).subscribe({
+    this.purchaseService.purchaseData(dataProduct.product_code, dataMobileNumber, amountInCents).subscribe({
       next: () => {
         this.toastr.success('Data purchase successful!', 'Success');
       },
@@ -136,12 +142,12 @@ export class DataComponent implements OnInit {
   saveMobiles(): void {
     this.userService.updateMobileNumbers(this.employeeNumber, this.mobileNumbers).subscribe({
       next: () => this.toastr.success('Mobile numbers updated', 'Success'),
-      error: () => this.toastr.error('Failed to update mobile numbers', 'Error'),
+      error: () => this.toastr.error('Failed to update mobile numbers', 'Error')
     });
   }
 
   selectMobile(mobile: string): void {
-    this.dataMobileNumber = mobile;
+    this.dataForm.patchValue({ dataMobileNumber: mobile });
     this.toastr.success('Mobile selected!', 'Selected');
   }
 

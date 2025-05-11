@@ -30,40 +30,23 @@
             *ngFor="let mobile of mobileNumbers"
             class="flex justify-between items-center bg-gray-50 p-3 sm:p-4 rounded-xl shadow gap-3"
           >
-            <!-- Mobile Number -->
-            <span class="break-words text-left flex-1">
-              {{ mobile }}
-            </span>
-
-            <!-- Buttons -->
+            <span class="break-words text-left flex-1">{{ mobile }}</span>
             <div class="flex gap-2">
-              <button
-                (click)="deleteMobile(mobile)"
-                class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded text-xs sm:text-sm"
-              >
-                Delete
-              </button>
-              <button
-                (click)="selectMobile(mobile)"
-                class="bg-green-600 hover:bg-green-700 text-white font-bold py-1.5 px-3 rounded text-xs sm:text-sm"
-              >
-                Select
-              </button>
+              <button (click)="deleteMobile(mobile)" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded text-xs sm:text-sm">Delete</button>
+              <button (click)="selectMobile(mobile)" class="bg-green-600 hover:bg-green-700 text-white font-bold py-1.5 px-3 rounded text-xs sm:text-sm">Select</button>
             </div>
           </div>
         </div>
       </section>
 
       <!-- Data Purchase Form -->
-      <form (ngSubmit)="purchaseData()" class="flex flex-col gap-4 text-sm sm:text-base">
+      <form [formGroup]="dataForm" (ngSubmit)="purchaseData()" class="flex flex-col gap-4 text-sm sm:text-base">
         <!-- Product Select -->
-        <div class="mb-2">
+        <div>
           <label for="dataProduct" class="block font-bold mb-1">Select Data Product:</label>
           <select
+            formControlName="dataProduct"
             id="dataProduct"
-            [(ngModel)]="selectedDataProduct"
-            name="dataProduct"
-            required
             (change)="onProductChange()"
             class="w-full border-2 border-gray-300 rounded-xl px-3 py-2"
           >
@@ -73,46 +56,44 @@
           </select>
         </div>
 
-        <!-- Mobile Input -->
-        <div class="mb-2">
+        <!-- Mobile Number -->
+        <div>
           <label for="dataMobileNumber" class="block font-bold mb-1">Mobile Number:</label>
           <input
-            type="text"
             id="dataMobileNumber"
-            [(ngModel)]="dataMobileNumber"
-            name="dataMobileNumber"
+            type="text"
+            formControlName="dataMobileNumber"
             inputmode="numeric"
-            required
             class="w-full border-2 border-gray-300 rounded-xl px-3 py-2"
           />
+          <div class="text-red-600 text-xs mt-1" *ngIf="dataForm.get('dataMobileNumber')?.touched && dataForm.get('dataMobileNumber')?.invalid">
+            <span *ngIf="dataForm.get('dataMobileNumber')?.errors?.['required']">Mobile number is required.</span>
+            <span *ngIf="dataForm.get('dataMobileNumber')?.errors?.['pattern']">Must be a 10-digit number.</span>
+          </div>
         </div>
 
-        <!-- Amount Input -->
-        <div class="mb-2">
+        <!-- Amount -->
+        <div>
           <label for="dataAmount" class="block font-bold mb-1">Amount:</label>
           <div class="relative w-full">
             <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">R</span>
             <input
-              type="number"
               id="dataAmount"
-              [(ngModel)]="dataInputValue"
-              name="dataAmount"
-              required
+              type="number"
+              formControlName="dataAmount"
               class="w-full border-2 border-gray-300 rounded-xl pl-8 pr-4 py-2"
             />
+          </div>
+          <div class="text-red-600 text-xs mt-1" *ngIf="dataForm.get('dataAmount')?.touched && dataForm.get('dataAmount')?.invalid">
+            <span *ngIf="dataForm.get('dataAmount')?.errors?.['required']">Amount is required.</span>
+            <span *ngIf="dataForm.get('dataAmount')?.errors?.['min']">Minimum amount is R2.</span>
           </div>
         </div>
 
         <!-- Submit Button -->
         <button
           type="submit"
-          [disabled]="
-            !selectedDataProduct || 
-            !dataMobileNumber || 
-            !dataInputValue || 
-            dataInputValue > availableAirtimeLimit || 
-            isLoading
-          "
+          [disabled]="dataForm.invalid || isLoading || dataForm.value.dataAmount > availableAirtimeLimit"
           class="bg-green-600 hover:bg-green-700 text-white font-extrabold py-3 px-5 rounded-xl text-sm sm:text-base w-full"
         >
           <span *ngIf="!isLoading">Buy Data</span>
@@ -120,7 +101,7 @@
         </button>
 
         <!-- Low Balance Warning -->
-        <p class="text-red-600 font-semibold text-xs sm:text-sm" *ngIf="dataInputValue > availableAirtimeLimit">
+        <p class="text-red-600 font-semibold text-xs sm:text-sm" *ngIf="dataForm.value.dataAmount > availableAirtimeLimit">
           You do not have enough funds available.
         </p>
 
