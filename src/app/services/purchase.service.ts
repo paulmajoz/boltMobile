@@ -95,11 +95,20 @@ export class PurchaseService {
     return this.http.post(`${this.nestApiUrl}/user-credits`, creditPayload);
   }
 
-  async purchaseElectricity(meterNumber: string, amount: number, customReference: string): Promise<any> {
+  async purchaseElectricity(
+    meterNumber: string,
+    amount: number,
+    customReference: string
+  ): Promise<any> {
     const productCode = '226';
     const employeeNumber = this.userService.getUser();
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
-
+  
+    console.log('🔌 Starting electricity purchase flow...');
+    console.log('👤 Employee Number:', employeeNumber);
+    console.log('📟 Meter Number:', meterNumber);
+    console.log('💰 Amount:', amount);
+  
     const transactionPayload = {
       productCode,
       mobileNumber: meterNumber,
@@ -107,10 +116,13 @@ export class PurchaseService {
       employeeNumber,
       createdAt: new Date().toISOString()
     };
+    console.log('📝 Saving transaction:', transactionPayload);
+  
     const transaction = await firstValueFrom(
       this.http.post<any>(`${this.nestApiUrl}/transactions/save-transaction`, transactionPayload)
     );
-
+    console.log('✅ Transaction saved:!!!', transaction);
+  
     const purchaseBody = new HttpParams()
       .set('vUsername', this.vUsername)
       .set('vPassword', this.vPassword)
@@ -118,12 +130,18 @@ export class PurchaseService {
       .set('vMeterNumber', meterNumber)
       .set('vAmount', amount.toString())
       .set('vCustomReference', customReference);
-
+  
+    console.log('⚡ Sending purchase request:', purchaseBody.toString());
+  
     const purchaseResponse = await firstValueFrom(
       this.http.post<any>(`${this.baseUrl}/vas/v1/purchase/electricity`, purchaseBody.toString(), { headers })
     );
-
+    console.log('⚡ Purchase Response:', purchaseResponse);
+  
     const transactionRef = purchaseResponse?.reference;
+    console.log('📌 Transaction Reference:', transactionRef);
+  
+    // 🔁 Immediately update transaction with purchase response success
     if (transactionRef) {
       await firstValueFrom(
         this.http.patch(`${this.nestApiUrl}/transactions/update-reference/${transaction._id}`, {
@@ -131,45 +149,59 @@ export class PurchaseService {
           success: purchaseResponse.success
         })
       );
+      console.log('🔄 Transaction updated with reference and success.');
     }
-
-    const pollTransactionResponse = async (ref: string): Promise<any> => {
-      const body = new HttpParams()
+  
+    const buildResponseParams = (ref: string): HttpParams =>
+      new HttpParams()
         .set('vUsername', this.vUsername)
         .set('vPassword', this.vPassword)
         .set('vReference', ref);
-
+  
+    const pollTransactionResponse = async (ref: string): Promise<any> => {
+      const responseBody = buildResponseParams(ref);
+      console.log('responseBody :>> ', responseBody);
       for (let attempt = 1; attempt <= 10; attempt++) {
+        console.log(`📡 Polling attempt ${attempt} for reference: ${ref}...`);
         const res = await firstValueFrom(
-          this.http.post<any>(`${this.baseUrl}/vas/v1/transaction/response`, body.toString(), { headers })
+          this.http.post<any>(`${this.baseUrl}/vas/v1/transaction/response`, responseBody.toString(), { headers })
         );
-        if (res?.data?.confirmation_number || res?.data?.elec_data?.std_tokens?.[0]?.code) return res;
+        console.log('📦 Transaction Poll Response:', res);
+  
+        if (res?.data?.confirmation_number) return res;
+        if (res?.data?.elec_data?.std_tokens?.[0]?.code) return res;
+  
+        console.log('⏳ Waiting 3s before next poll...');
         await new Promise(resolve => setTimeout(resolve, 3000));
       }
       throw new Error('Polling timed out. No valid response received.');
     };
-
+  
     let transactionResponse = await pollTransactionResponse(transactionRef);
+  
     let confirmationResponse = null;
-
     if (transactionResponse?.data?.confirmation_number) {
+      console.log('⚠️ Confirmation required. Sending confirmation...');
       const confirmBody = new HttpParams()
         .set('vUsername', this.vUsername)
         .set('vPassword', this.vPassword)
         .set('vProductCode', productCode)
         .set('vConfirmationNumber', transactionResponse.data.confirmation_number)
         .set('vAmount', amount.toString());
-
+  
       confirmationResponse = await firstValueFrom(
         this.http.post<any>(`${this.baseUrl}/vas/v1/confirm`, confirmBody.toString(), { headers })
       );
-
+      console.log('✅ Confirmation Response:', confirmationResponse);
+  
       const confirmRef = confirmationResponse?.reference || transactionRef;
+      console.log('📡 Polling again with confirmation reference:', confirmRef);
       transactionResponse = await pollTransactionResponse(confirmRef);
     }
-
+  
     const token = transactionResponse?.data?.elec_data?.std_tokens?.[0]?.code;
     if (token) {
+      console.log('🎁 Electricity token received:', token);
       await firstValueFrom(
         this.http.post(`${this.nestApiUrl}/user-credits`, {
           employeeNumber,
@@ -178,14 +210,24 @@ export class PurchaseService {
           createdAt: new Date().toISOString()
         })
       );
+      console.log('💳 Credit recorded for employee.');
+    } else {
+      console.warn('⚠️ No token found in transaction response.');
     }
-
+  
+    console.log('✅ Electricity purchase flow complete.');
+  
     return {
       purchase: purchaseResponse,
       confirmation: confirmationResponse,
-      transactionResponse
+      transactionResponse,
     };
   }
+  
+  
+  
+  
+
 
   confirmPurchase(reference: string, productCode: string, amount: number): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });

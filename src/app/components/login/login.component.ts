@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 import { UserService } from '../../services/user.service';
+import { Location } from '@angular/common';
 
 interface LoginCredentials {
   employeeNumber: string;
@@ -22,22 +23,26 @@ export class LoginComponent implements OnInit {
   employeeNumber = '';
   nationalId = '';
   errorMessage = '';
-  private userhash = '123';
+  private userhash = '';
 
   constructor(
     private readonly apiService: ApiService,
     private readonly router: Router,
     private readonly route: ActivatedRoute,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private location: Location
   ) {}
 
   ngOnInit(): void {
-    this.route.queryParamMap.subscribe(params => {
-      const hash = params.get('field1');
-      if (hash) {
-        this.userhash = hash;
-      }
-    });
+    const fullUrl = this.location.path(true);
+    const hash = fullUrl.split('#')[1];
+    if (hash) {
+      this.userhash = hash;
+      this.userhash = '123';
+    } else {
+      this.userhash = '123';
+      // this.router.navigate(['/unauthorized']); // optional
+    }
   }
 
   onSubmit(): void {
@@ -58,3 +63,5 @@ export class LoginComponent implements OnInit {
     });
   }
 }
+
+

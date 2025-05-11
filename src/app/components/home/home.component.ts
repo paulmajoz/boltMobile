@@ -42,6 +42,12 @@ export class HomeComponent {
       route: '/transactions',
       icon: 'credit_card',
       description: 'View your transaction history'
-    }
+    },
+    // {
+    //   title: '2048',
+    //   route: '/dashboard',
+    //   icon: 'sports_esports',
+    //   description: 'Play 2048'
+    // }
   ];
 }
