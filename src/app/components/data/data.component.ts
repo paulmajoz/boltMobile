@@ -7,6 +7,7 @@ import { PurchaseService } from '../../services/purchase.service';
 import { ToastrService } from 'ngx-toastr';
 import { UserService } from '../../services/user.service';
 import { Router } from '@angular/router';
+import { HeaderRefreshService } from '../../services/header-refresh.service'; // ✅ Import
 
 @Component({
   selector: 'app-data',
@@ -29,7 +30,8 @@ export class DataComponent implements OnInit {
     private purchaseService: PurchaseService,
     private userService: UserService,
     private toastr: ToastrService,
-    private router: Router
+    private router: Router,
+    private headerRefreshService: HeaderRefreshService // ✅ Inject
   ) {}
 
   ngOnInit(): void {
@@ -121,6 +123,10 @@ export class DataComponent implements OnInit {
     this.purchaseService.purchaseData(dataProduct.product_code, dataMobileNumber, amountInCents).subscribe({
       next: () => {
         this.toastr.success('Data purchase successful!', 'Success');
+        this.headerRefreshService.triggerRefresh(); // ✅ Refresh header
+        this.dataForm.reset();
+        this.fetchDataProducts();
+        this.calculateAvailableLimit();
       },
       error: () => {
         this.toastr.error('Data purchase failed. Please try again.', 'Error');

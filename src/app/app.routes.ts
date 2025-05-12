@@ -15,6 +15,7 @@ export const routes: Routes = [
 
   // With this scoped route instead:
   // { path: ':userhash/login', component: LoginComponent },
+  
   { path: '', component: LoginComponent },
 
   // { path: '', redirectTo: '/login', pathMatch: 'full' },

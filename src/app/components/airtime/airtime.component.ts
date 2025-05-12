@@ -7,6 +7,7 @@ import { PurchaseService } from '../../services/purchase.service';
 import { ToastrService } from 'ngx-toastr';
 import { UserService } from '../../services/user.service';
 import { Router } from '@angular/router';
+import { HeaderRefreshService } from '../../services/header-refresh.service'; // ✅ Import the service
 
 @Component({
   selector: 'app-airtime',
@@ -29,7 +30,8 @@ export class AirtimeComponent implements OnInit {
     private purchaseService: PurchaseService,
     private userService: UserService,
     private toastr: ToastrService,
-    private router: Router
+    private router: Router,
+    private headerRefreshService: HeaderRefreshService // ✅ Inject the service
   ) {}
 
   ngOnInit(): void {
@@ -112,7 +114,10 @@ export class AirtimeComponent implements OnInit {
       next: (response) => {
         if (response?.reference) {
           this.toastr.success('Airtime purchase successful.', 'Success');
-          setTimeout(() => window.location.reload(), 500);
+          this.headerRefreshService.triggerRefresh(); // ✅ Refresh header
+          this.airtimeForm.reset();
+          this.fetchAirtimeProducts();
+          this.calculateAvailableLimit();
         } else {
           this.toastr.error('Purchase went through but no reference received.', 'Missing Reference');
         }

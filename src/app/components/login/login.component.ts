@@ -23,7 +23,7 @@ export class LoginComponent implements OnInit {
   employeeNumber = '';
   nationalId = '';
   errorMessage = '';
-  private userhash = '';
+  private userhash = '123';
 
   constructor(
     private readonly apiService: ApiService,
@@ -37,7 +37,7 @@ export class LoginComponent implements OnInit {
     const fullUrl = this.location.path(true);
     const hash = fullUrl.split('#')[1];
     if (hash) {
-      this.userhash = hash;
+      this.userhash = 'hash';
     } else {
       // this.router.navigate(['/unauthorized']); // optional
     }
