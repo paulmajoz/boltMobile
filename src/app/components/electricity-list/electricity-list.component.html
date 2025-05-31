@@ -1,0 +1,39 @@
+<div class="min-h-screen bg-gray-50">
+    <app-header></app-header>
+  
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <h2 class="text-lg sm:text-3xl font-bold text-secondary mb-4">Electricity Tokens</h2>
+  
+      <div *ngIf="transactions.length; else noData" class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 mt-2 text-sm sm:text-xl">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="text-left px-2 py-2 whitespace-nowrap">Amount</th>
+              <th class="text-left px-2 py-2 whitespace-nowrap">Token</th>
+              <th class="text-left px-2 py-2 whitespace-nowrap">Date</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr *ngFor="let txn of transactions">
+              <td class="px-2 py-2">R{{ txn.amount / 100 | number:'1.2-2' }}</td>
+              <td class="px-2 py-2 break-words text-xs sm:text-base">{{ txn.token || 'N/A' }}</td>
+              <td class="px-2 py-2 whitespace-nowrap">{{ txn.createdAt | date: 'MMM d, y, h:mm a' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+  
+      <ng-template #noData>
+        <p class="mt-4 text-gray-600 text-sm sm:text-xl">No electricity transactions found.</p>
+      </ng-template>
+    </main>
+  
+    <button
+      (click)="goHome()"
+      style="bottom: 1rem; left: 1rem;"
+      class="fixed bg-green-600 hover:bg-green-700 text-white font-extrabold py-4 px-6 rounded-xl text-base sm:text-3xl shadow-xl"
+    >
+      Back
+    </button>
+  </div>
+  

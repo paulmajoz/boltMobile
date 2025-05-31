@@ -5,12 +5,12 @@ import { UserService } from '../../services/user.service';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-transactions',
+  selector: 'app-electricity-list',
   standalone: true,
   imports: [CommonModule, HeaderComponent],
-  templateUrl: './transactions.component.html'
+  templateUrl: './electricity-list.component.html'
 })
-export class TransactionsComponent implements OnInit {
+export class ElectricityListComponent implements OnInit {
   transactions: any[] = [];
 
   constructor(
@@ -32,7 +32,7 @@ export class TransactionsComponent implements OnInit {
         console.log('transactions :>> ', transactions);
       },
       error: () => {
-        // Could add Toastr here if desired
+        // Optional: Toastr or error notification
       }
     });
   }

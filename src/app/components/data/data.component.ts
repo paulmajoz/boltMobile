@@ -121,8 +121,14 @@ export class DataComponent implements OnInit {
     this.isLoading = true;
 
     this.purchaseService.purchaseData(dataProduct.product_code, dataMobileNumber, amountInCents).subscribe({
-      next: () => {
-        this.toastr.success('Data purchase successful!', 'Success');
+      next: (response) => {
+        if (response.data.success){
+          this.toastr.success('Data purchase successful!', 'Success');
+        }
+        if (!response.data.success){
+          this.toastr.error('Data purchase failed. Please try again.', 'Error');
+        }
+
         this.headerRefreshService.triggerRefresh(); // ✅ Refresh header
         this.dataForm.reset();
         this.fetchDataProducts();
@@ -135,6 +141,7 @@ export class DataComponent implements OnInit {
         this.isLoading = false;
       }
     });
+
   }
 
   addMobile(): void {

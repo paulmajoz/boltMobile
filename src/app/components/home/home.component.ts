@@ -43,11 +43,11 @@ export class HomeComponent {
       icon: 'credit_card',
       description: 'View your transaction history'
     },
-    // {
-    //   title: '2048',
-    //   route: '/dashboard',
-    //   icon: '',
-    //   description: 'Play 2048'
-    // }
+    {
+      title: 'Electricity Tokens',
+      route: '/electricity-list',
+      icon: 'dynamic_form',
+      description: 'View previous electricity tokens'
+    }
   ];
 }

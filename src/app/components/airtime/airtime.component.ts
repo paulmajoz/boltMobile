@@ -94,7 +94,15 @@ export class AirtimeComponent implements OnInit {
     });
   }
 
+  get isAmountExceedingLimit(): boolean {
+    const amount = this.airtimeForm.get('airtimeAmount')?.value;
+    return amount && amount > this.availableAirtimeLimit;
+  }
+  
+
   purchaseAirtime(): void {
+    this.calculateAvailableLimit();
+    
     if (this.airtimeForm.invalid) {
       this.airtimeForm.markAllAsTouched();
       this.toastr.warning('Please correct the form before submitting.', 'Invalid Input');
@@ -112,14 +120,15 @@ export class AirtimeComponent implements OnInit {
       amountInCents
     ).subscribe({
       next: (response) => {
-        if (response?.reference) {
+        console.log('response :>> ', response);
+        if (response?.success ) {
           this.toastr.success('Airtime purchase successful.', 'Success');
-          this.headerRefreshService.triggerRefresh(); // ✅ Refresh header
+          this.headerRefreshService.triggerRefresh(); 
           this.airtimeForm.reset();
           this.fetchAirtimeProducts();
           this.calculateAvailableLimit();
         } else {
-          this.toastr.error('Purchase went through but no reference received.', 'Missing Reference');
+          // this.toastr.error('Purchase went through but no reference received.', 'Missing Reference');
         }
       },
       error: () => {
