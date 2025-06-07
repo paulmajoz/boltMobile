@@ -2,12 +2,19 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
+
 import { HeaderComponent } from '../header/header.component';
 import { PurchaseService } from '../../services/purchase.service';
-import { ToastrService } from 'ngx-toastr';
 import { UserService } from '../../services/user.service';
-import { Router } from '@angular/router';
-import { HeaderRefreshService } from '../../services/header-refresh.service'; // ✅ Import
+import { HeaderRefreshService } from '../../services/header-refresh.service';
+
+interface DataProduct {
+  product_code: string;
+  product_description: string;
+  product_value: string;
+}
 
 @Component({
   selector: 'app-data',
@@ -18,11 +25,11 @@ import { HeaderRefreshService } from '../../services/header-refresh.service'; //
 })
 export class DataComponent implements OnInit {
   dataForm!: FormGroup;
-  dataProducts: any[] = [];
+  dataProducts: DataProduct[] = [];
   mobileNumbers: string[] = [];
   newMobile = '';
-  employeeNumber = '';
   availableAirtimeLimit = 0;
+  employeeNumber = '';
   isLoading = false;
 
   constructor(
@@ -31,44 +38,48 @@ export class DataComponent implements OnInit {
     private userService: UserService,
     private toastr: ToastrService,
     private router: Router,
-    private headerRefreshService: HeaderRefreshService // ✅ Inject
+    private headerRefreshService: HeaderRefreshService
   ) {}
 
   ngOnInit(): void {
     this.employeeNumber = localStorage.getItem('employeeNumber') || '';
     if (!this.employeeNumber) return;
 
+    this.initForm();
+    this.loadData();
+  }
+
+  private initForm(): void {
     this.dataForm = this.fb.group({
       dataProduct: [null, Validators.required],
       dataMobileNumber: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
-      dataAmount: [null, [Validators.required, Validators.min(1)]]
+      dataAmount: [{ value: null, disabled: true }, [Validators.required, Validators.min(2)]]
     });
+  }
 
+  private loadData(): void {
     this.fetchDataProducts();
     this.loadMobileNumbers();
     this.calculateAvailableLimit();
   }
 
-  fetchDataProducts(): void {
+  private fetchDataProducts(): void {
     this.purchaseService.getDataProducts().subscribe({
       next: (response) => {
         if (response.success && response.product_list.length > 0) {
           this.dataProducts = response.product_list;
+          const firstProduct = this.dataProducts[0];
           this.dataForm.patchValue({
-            dataProduct: this.dataProducts[0],
-            dataAmount: this.dataProducts[0].product_value
+            dataProduct: firstProduct,
+            dataAmount: firstProduct.product_value
           });
-        } else {
-          this.toastr.warning('No data products available.', 'Warning');
         }
       },
-      error: () => {
-        this.toastr.error('Failed to load data products.', 'Error');
-      }
+      error: () => this.toastr.error('Failed to load data products', 'Error')
     });
   }
 
-  loadMobileNumbers(): void {
+  private loadMobileNumbers(): void {
     this.userService.getUserProfile(this.employeeNumber).subscribe({
       next: (user) => {
         this.mobileNumbers = user.mobileNumbers || [];
@@ -77,15 +88,16 @@ export class DataComponent implements OnInit {
     });
   }
 
-  calculateAvailableLimit(): void {
+  private calculateAvailableLimit(): void {
     let closingBalance = 0;
+
     const fetchLimit = () => {
       this.userService.getAppParam('airtimeLimit').subscribe({
         next: (paramData) => {
           const airtimeLimit = parseFloat(paramData.value);
           this.availableAirtimeLimit = airtimeLimit - closingBalance;
         },
-        error: () => console.error('Error fetching airtimeLimit')
+        error: () => console.error('Failed to fetch airtimeLimit')
       });
     };
 
@@ -95,10 +107,15 @@ export class DataComponent implements OnInit {
         fetchLimit();
       },
       error: () => {
-        console.error('Error fetching user balance, defaulting to 0');
+        console.error('Failed to fetch user balance, defaulting to 0');
         fetchLimit();
       }
     });
+  }
+
+  get isAmountExceedingLimit(): boolean {
+    const amount = this.dataForm.get('dataAmount')?.value;
+    return amount && amount > this.availableAirtimeLimit;
   }
 
   onProductChange(): void {
@@ -109,39 +126,43 @@ export class DataComponent implements OnInit {
   }
 
   purchaseData(): void {
+    this.dataForm.disable();
+    this.calculateAvailableLimit();
+
     if (this.dataForm.invalid) {
       this.dataForm.markAllAsTouched();
-      this.toastr.warning('Please complete the form correctly.', 'Validation Error');
+      this.toastr.warning('Please correct the form before submitting.', 'Invalid Input');
+      this.dataForm.enable();
       return;
     }
 
     const { dataProduct, dataMobileNumber, dataAmount } = this.dataForm.value;
     const amountInCents = dataAmount * 100;
-
     this.isLoading = true;
 
-    this.purchaseService.purchaseData(dataProduct.product_code, dataMobileNumber, amountInCents).subscribe({
+    this.purchaseService.purchaseData(
+      dataProduct.product_code,
+      dataMobileNumber,
+      amountInCents
+    ).subscribe({
       next: (response) => {
-        if (response.data.success){
-          this.toastr.success('Data purchase successful!', 'Success');
+        if (response?.data.success) {
+          this.toastr.success('Data purchase successful.', 'Success');
+          this.headerRefreshService.triggerRefresh();
+          this.dataForm.reset();
+          this.fetchDataProducts();
+          this.calculateAvailableLimit();
         }
-        if (!response.data.success){
-          this.toastr.error('Data purchase failed. Please try again.', 'Error');
+        if (!response?.data.success) {
+          this.toastr.error(response.data.provider_response.response_message, 'Error');
         }
-
-        this.headerRefreshService.triggerRefresh(); // ✅ Refresh header
-        this.dataForm.reset();
-        this.fetchDataProducts();
-        this.calculateAvailableLimit();
       },
-      error: () => {
-        this.toastr.error('Data purchase failed. Please try again.', 'Error');
-      },
+      error: () => this.toastr.error('Data purchase failed. Please try again.', 'Error'),
       complete: () => {
+        this.dataForm.enable();
         this.isLoading = false;
       }
     });
-
   }
 
   addMobile(): void {
@@ -152,7 +173,7 @@ export class DataComponent implements OnInit {
     }
   }
 
-  saveMobiles(): void {
+  private saveMobiles(): void {
     this.userService.updateMobileNumbers(this.employeeNumber, this.mobileNumbers).subscribe({
       next: () => this.toastr.success('Mobile numbers updated', 'Success'),
       error: () => this.toastr.error('Failed to update mobile numbers', 'Error')
@@ -167,12 +188,10 @@ export class DataComponent implements OnInit {
   deleteMobile(mobile: string): void {
     this.userService.deleteMobileNumber(this.employeeNumber, mobile).subscribe({
       next: () => {
-        this.mobileNumbers = this.mobileNumbers.filter(m => m !== mobile);
+        this.mobileNumbers = this.mobileNumbers.filter((m) => m !== mobile);
         this.toastr.success('Mobile number deleted', 'Success');
       },
-      error: () => {
-        this.toastr.error('Failed to delete mobile number', 'Error');
-      }
+      error: () => this.toastr.error('Failed to delete mobile number', 'Error')
     });
   }
 

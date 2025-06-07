@@ -1,0 +1,152 @@
+<div class="min-h-screen bg-gray-50 flex flex-col overflow-hidden">
+  <main class="flex-1 px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-8 overflow-y-auto">
+    <!-- Loading Spinner -->
+    <div *ngIf="loading" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+      <div class="animate-spin rounded-full h-10 w-10 md:h-12 md:w-12 border-4 border-white border-t-transparent"></div>
+    </div>
+
+    <!-- FORM SECTION -->
+    <ng-container *ngIf="!submitted">
+      <!-- Q1 -->
+      <section class="mb-2">
+        <label class="block font-semibold mb-2 text-center text-[clamp(1rem,2.5vw,1.25rem)]">1. What is on fire?</label>
+        <div class="flex justify-center">
+          <div class="flex flex-wrap justify-center gap-2 sm:gap-3">
+            <button *ngFor="let option of ['Building', 'Vehicle', 'Veld', 'Appliance', 'Electrical Box','Other']"
+              [ngClass]="{
+                'bg-green-600 text-white': isSelected('fireSource', option),
+                'bg-white text-black': !isSelected('fireSource', option)
+              }"
+              class="border border-gray-300 rounded-xl px-[clamp(0.75rem,2.5vw,1.5rem)] py-[clamp(0.5rem,1.5vw,0.75rem)] text-[clamp(0.75rem,2.2vw,1rem)] font-medium"
+              (click)="selectOption('fireSource', option)">
+              {{ option }}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Q2 -->
+      <section class="mb-2">
+        <label class="block font-semibold mb-2 text-center text-[clamp(1rem,2.5vw,1.25rem)]">2. Where is the fire located?</label>
+        <input
+          [(ngModel)]="form.location"
+          type="text"
+          placeholder="Enter address or landmark"
+          class="w-full border border-gray-300 rounded-xl px-3 py-2 text-[clamp(0.85rem,2vw,1rem)] mb-2"
+        />
+        <div class="flex flex-col sm:flex-row w-full gap-2">
+          <button
+            (click)="getCoordinates()"
+            type="button"
+            class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl py-[clamp(0.5rem,1.5vw,0.75rem)] text-[clamp(0.75rem,2vw,1rem)]"
+          >
+            Use My GPS Location
+          </button>
+          <button
+            (click)="setLocationToHome()"
+            type="button"
+            class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl py-[clamp(0.5rem,1.5vw,0.75rem)] text-[clamp(0.75rem,2vw,1rem)]"
+          >
+            Use My Home Address
+          </button>
+        </div>
+        <span *ngIf="form.coordinates" class="block mt-2 text-center text-gray-600 text-[clamp(0.7rem,1.8vw,0.9rem)]">
+          📍 {{ form.coordinates }}
+        </span>
+      </section>
+
+      <!-- Q3 -->
+      <section class="mb-2">
+        <label class="block font-semibold mb-2 text-center text-[clamp(1rem,2.5vw,1.25rem)]">3. Is anyone trapped or injured?</label>
+        <div class="flex justify-center">
+          <div class="flex flex-wrap justify-center gap-2 sm:gap-3">
+            <button
+              [ngClass]="{
+                'bg-green-600 text-white': isSelected('trappedOrInjured', 'Yes'),
+                'bg-white text-black': !isSelected('trappedOrInjured', 'Yes')
+              }"
+              class="border border-gray-300 rounded-xl px-5 py-2 text-[clamp(0.75rem,2vw,1rem)] font-medium"
+              (click)="selectOption('trappedOrInjured', 'Yes')">
+              Yes
+            </button>
+            <button
+              [ngClass]="{
+                'bg-green-600 text-white': isSelected('trappedOrInjured', 'No'),
+                'bg-white text-black': !isSelected('trappedOrInjured', 'No')
+              }"
+              class="border border-gray-300 rounded-xl px-5 py-2 text-[clamp(0.75rem,2vw,1rem)] font-medium"
+              (click)="selectOption('trappedOrInjured', 'No')">
+              No
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Q4 -->
+      <section class="mb-2">
+        <label class="block font-semibold mb-2 text-center text-[clamp(1rem,2.5vw,1.25rem)]">4. How large is the fire?</label>
+        <div class="flex justify-center">
+          <div class="flex flex-wrap justify-center gap-2 sm:gap-3">
+            <button *ngFor="let option of ['Small and contained', 'Spreading', 'Out of control']"
+              [ngClass]="{
+                'bg-green-600 text-white': isSelected('fireSize', option),
+                'bg-white text-black': !isSelected('fireSize', option)
+              }"
+              class="border border-gray-300 rounded-xl px-4 py-2 text-[clamp(0.75rem,2vw,1rem)] font-medium"
+              (click)="selectOption('fireSize', option)">
+              {{ option }}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Q5 -->
+      <section class="mb-2">
+        <label class="block font-semibold mb-2 text-center text-[clamp(1rem,2.5vw,1.25rem)]">5. Is it safe for you to stay where you are?</label>
+        <div class="flex justify-center">
+          <div class="flex flex-wrap justify-center gap-2 sm:gap-3">
+            <button
+              [ngClass]="{
+                'bg-green-600 text-white': isSelected('safeToStay', 'Yes'),
+                'bg-white text-black': !isSelected('safeToStay', 'Yes')
+              }"
+              class="border border-gray-300 rounded-xl px-5 py-2 text-[clamp(0.75rem,2vw,1rem)] font-medium"
+              (click)="selectOption('safeToStay', 'Yes')">
+              Yes
+            </button>
+            <button
+              [ngClass]="{
+                'bg-green-600 text-white': isSelected('safeToStay', 'No'),
+                'bg-white text-black': !isSelected('safeToStay', 'No')
+              }"
+              class="border border-gray-300 rounded-xl px-5 py-2 text-[clamp(0.75rem,2vw,1rem)] font-medium"
+              (click)="selectOption('safeToStay', 'No')">
+              No
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Submit -->
+      <div class="flex justify-center mt-4">
+        <button
+          (click)="submitForm()"
+          class="bg-red-600 hover:bg-red-700 text-white font-bold py-[clamp(0.6rem,2vw,0.9rem)] px-[clamp(1rem,5vw,2rem)] rounded-xl w-full sm:w-auto text-[clamp(0.85rem,2.2vw,1rem)] shadow-md">
+          Submit Emergency Report
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- Success Message -->
+    <div *ngIf="submitted" class="mt-6 p-4 bg-green-100 border border-green-300 rounded-xl shadow-sm">
+      <h4 class="text-[clamp(1rem,2.5vw,1.25rem)] font-bold text-green-800 mb-2 text-center">Emergency Report Sent</h4>
+      <p class="text-green-900 text-[clamp(0.8rem,2vw,1rem)] text-center mb-3">
+        Thank you for reporting. Help is on the way. If you need urgent assistance, please call our emergency line:
+      </p>
+      <a [href]="'tel:' + emergencyNumber"
+         class="block text-center bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-5 rounded-xl w-full sm:w-auto text-[clamp(0.85rem,2vw,1rem)] shadow-md">
+        📞 Call {{ emergencyNumber }}
+      </a>
+    </div>
+  </main>
+</div>

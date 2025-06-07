@@ -2,12 +2,19 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
+
 import { HeaderComponent } from '../header/header.component';
 import { PurchaseService } from '../../services/purchase.service';
-import { ToastrService } from 'ngx-toastr';
 import { UserService } from '../../services/user.service';
-import { Router } from '@angular/router';
-import { HeaderRefreshService } from '../../services/header-refresh.service'; // ✅ Import the service
+import { HeaderRefreshService } from '../../services/header-refresh.service';
+
+interface AirtimeProduct {
+  product_code: string;
+  product_description: string;
+  product_value: string;
+}
 
 @Component({
   selector: 'app-airtime',
@@ -18,7 +25,7 @@ import { HeaderRefreshService } from '../../services/header-refresh.service'; //
 })
 export class AirtimeComponent implements OnInit {
   airtimeForm!: FormGroup;
-  airtimeProducts: any[] = [];
+  airtimeProducts: AirtimeProduct[] = [];
   mobileNumbers: string[] = [];
   newMobile = '';
   availableAirtimeLimit = 0;
@@ -31,37 +38,44 @@ export class AirtimeComponent implements OnInit {
     private userService: UserService,
     private toastr: ToastrService,
     private router: Router,
-    private headerRefreshService: HeaderRefreshService // ✅ Inject the service
+    private headerRefreshService: HeaderRefreshService
   ) {}
 
   ngOnInit(): void {
     this.employeeNumber = localStorage.getItem('employeeNumber') || '';
     if (!this.employeeNumber) return;
 
+    this.initForm();
+    this.loadData();
+  }
+
+  private initForm(): void {
     this.airtimeForm = this.fb.group({
       airtimeProduct: [null, Validators.required],
       airtimeMobileNumber: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
       airtimeAmount: [null, [Validators.required, Validators.min(2)]]
     });
+  }
 
+  private loadData(): void {
     this.fetchAirtimeProducts();
     this.loadMobileNumbers();
     this.calculateAvailableLimit();
   }
 
-  fetchAirtimeProducts(): void {
+  private fetchAirtimeProducts(): void {
     this.purchaseService.getAirtimeProducts().subscribe({
       next: (response) => {
         if (response.success && response.product_list.length > 0) {
           this.airtimeProducts = response.product_list;
-          this.airtimeForm.patchValue({ airtimeProduct: response.product_list[0] });
+          this.airtimeForm.patchValue({ airtimeProduct: this.airtimeProducts[0] });
         }
       },
       error: () => this.toastr.error('Failed to load airtime products', 'Error')
     });
   }
 
-  loadMobileNumbers(): void {
+  private loadMobileNumbers(): void {
     this.userService.getUserProfile(this.employeeNumber).subscribe({
       next: (user) => {
         this.mobileNumbers = user.mobileNumbers || [];
@@ -70,8 +84,9 @@ export class AirtimeComponent implements OnInit {
     });
   }
 
-  calculateAvailableLimit(): void {
+  private calculateAvailableLimit(): void {
     let closingBalance = 0;
+
     const fetchLimit = () => {
       this.userService.getAppParam('airtimeLimit').subscribe({
         next: (paramData) => {
@@ -98,47 +113,6 @@ export class AirtimeComponent implements OnInit {
     const amount = this.airtimeForm.get('airtimeAmount')?.value;
     return amount && amount > this.availableAirtimeLimit;
   }
-  
-
-  purchaseAirtime(): void {
-    this.calculateAvailableLimit();
-    
-    if (this.airtimeForm.invalid) {
-      this.airtimeForm.markAllAsTouched();
-      this.toastr.warning('Please correct the form before submitting.', 'Invalid Input');
-      return;
-    }
-
-    const { airtimeProduct, airtimeMobileNumber, airtimeAmount } = this.airtimeForm.value;
-    const amountInCents = airtimeAmount * 100;
-
-    this.isLoading = true;
-
-    this.purchaseService.purchaseAirtime(
-      airtimeProduct.product_code,
-      airtimeMobileNumber,
-      amountInCents
-    ).subscribe({
-      next: (response) => {
-        console.log('response :>> ', response);
-        if (response?.success ) {
-          this.toastr.success('Airtime purchase successful.', 'Success');
-          this.headerRefreshService.triggerRefresh(); 
-          this.airtimeForm.reset();
-          this.fetchAirtimeProducts();
-          this.calculateAvailableLimit();
-        } else {
-          // this.toastr.error('Purchase went through but no reference received.', 'Missing Reference');
-        }
-      },
-      error: () => {
-        this.toastr.error('Airtime purchase failed. Please try again.', 'Error');
-      },
-      complete: () => {
-        this.isLoading = false;
-      }
-    });
-  }
 
   addMobile(): void {
     if (this.newMobile && !this.mobileNumbers.includes(this.newMobile)) {
@@ -148,10 +122,10 @@ export class AirtimeComponent implements OnInit {
     }
   }
 
-  saveMobiles(): void {
+  private saveMobiles(): void {
     this.userService.updateMobileNumbers(this.employeeNumber, this.mobileNumbers).subscribe({
       next: () => this.toastr.success('Mobile numbers updated', 'Success'),
-      error: () => this.toastr.error('Failed to update mobile numbers', 'Error'),
+      error: () => this.toastr.error('Failed to update mobile numbers', 'Error')
     });
   }
 
@@ -166,13 +140,51 @@ export class AirtimeComponent implements OnInit {
         this.mobileNumbers = this.mobileNumbers.filter((m) => m !== mobile);
         this.toastr.success('Mobile number deleted', 'Success');
       },
-      error: () => {
-        this.toastr.error('Failed to delete mobile number', 'Error');
-      }
+      error: () => this.toastr.error('Failed to delete mobile number', 'Error')
     });
   }
 
   goHome(): void {
     this.router.navigate(['/home']);
+  }
+
+  purchaseAirtime(): void {
+    this.airtimeForm.disable();
+    this.calculateAvailableLimit();
+
+    if (this.airtimeForm.invalid) {
+      this.airtimeForm.markAllAsTouched();
+      this.toastr.warning('Please correct the form before submitting.', 'Invalid Input');
+      this.airtimeForm.enable();
+      return;
+    }
+
+    const { airtimeProduct, airtimeMobileNumber, airtimeAmount } = this.airtimeForm.value;
+    const amountInCents = airtimeAmount * 100;
+    this.isLoading = true;
+
+    this.purchaseService.purchaseAirtime(
+      airtimeProduct.product_code,
+      airtimeMobileNumber,
+      amountInCents
+    ).subscribe({
+      next: (response) => {
+        if (response?.data.success) {
+          this.toastr.success('Airtime purchase successful.', 'Success');
+          this.headerRefreshService.triggerRefresh();
+          this.airtimeForm.reset();
+          this.fetchAirtimeProducts();
+          this.calculateAvailableLimit();
+        }
+        if(!response?.data.success){
+          this.toastr.error( response.data.provider_response.response_message, 'Error')
+        }
+      },
+      error: () => this.toastr.error('Airtime purchase failed. Please try again.', 'Error'),
+      complete: () => {
+        this.airtimeForm.enable();
+        this.isLoading = false;
+      }
+    });
   }
 }

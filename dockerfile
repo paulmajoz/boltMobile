@@ -20,5 +20,6 @@ WORKDIR /usr/src/app
 COPY --from=build /app/dist/demo/browser .
 
 EXPOSE 8090
-CMD ["http-server", "-p", "8090", "-a", "0.0.0.0", "-c-1"]
+CMD ["http-server", "-p", "8090", "-a", "0.0.0.0", "-c-1", "--fallback", "index.html"]
+
 

@@ -27,5 +27,12 @@ export const routes: Routes = [
   // { path: 'settings', component: SettingsComponent },
   { path: 'airtime', component: AirtimeComponent },
   { path: 'data', component: DataComponent },
-  { path: 'electricity', component: ElectricityComponent }
+  { path: 'electricity', component: ElectricityComponent },
+  {
+    path: 'fire-emergency',
+    loadComponent: () =>
+      import('./fire-emergency-form/fire-emergency-form.component').then(
+        (m) => m.FireEmergencyFormComponent
+      ),
+  }
 ];

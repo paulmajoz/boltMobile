@@ -72,6 +72,7 @@ export class ElectricityComponent implements OnInit {
   }
 
   async purchaseElectricity(): Promise<void> {
+    
     if (!this.selectedElectricityProduct || !this.meterNumber || !this.amountInRands) {
       this.toastr.warning('Please fill in all required fields.', 'Incomplete Form');
       return;
@@ -103,6 +104,8 @@ export class ElectricityComponent implements OnInit {
       this.toastr.error('Electricity purchase failed. Please try again.', 'Error');
     } finally {
       this.isLoading = false;
+      this.loadProfileData();
+      this.calculateAvailableLimit();
     }
 
   }

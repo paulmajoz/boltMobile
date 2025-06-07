@@ -35,13 +35,27 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     const fullUrl = this.location.path(true);
+  
+    // Check if there's a ? in the URL
+    if (fullUrl.includes('?')) {
+      const rawQuery = fullUrl.split('?')[1]; // Get everything after the ?
+  
+      // Optionally: log the rawQuery for debugging
+      console.log('Raw Query String:', rawQuery);
+  
+      // Redirect to fire-emergency and pass the raw query string (optional)
+      this.router.navigate(['/fire-emergency'], { queryParams: { raw: rawQuery } });
+      return;
+    }
+  
+    // fallback: check for # in URL
     const hash = fullUrl.split('#')[1];
     if (hash) {
-      this.userhash = hash ;
-    } else {
-      // this.router.navigate(['/unauthorized']); // optional
+      this.userhash = hash;
     }
   }
+  
+  
 
   onSubmit(): void {
     const credentials: LoginCredentials = {
