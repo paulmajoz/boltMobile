@@ -9,7 +9,7 @@
     <ng-container *ngIf="!submitted">
       <!-- Q1 -->
       <section class="mb-2">
-        <label class="block font-semibold mb-2 text-center text-[clamp(1rem,2.5vw,1.25rem)]">1. What is on fire?</label>
+        <label class="block font-semibold mb-2  text-[clamp(1rem,2.5vw,1.25rem)]">1. What is on fire?</label>
         <div class="flex justify-center">
           <div class="flex flex-wrap justify-center gap-2 sm:gap-3">
             <button *ngFor="let option of ['Building', 'Vehicle', 'Veld', 'Appliance', 'Electrical Box','Other']"
@@ -27,7 +27,7 @@
 
       <!-- Q2 -->
       <section class="mb-2">
-        <label class="block font-semibold mb-2 text-center text-[clamp(1rem,2.5vw,1.25rem)]">2. Where is the fire located?</label>
+        <label class="block font-semibold mb-2  text-[clamp(1rem,2.5vw,1.25rem)]">2. Where is the fire located?</label>
         <input
           [(ngModel)]="form.location"
           type="text"
@@ -57,7 +57,7 @@
 
       <!-- Q3 -->
       <section class="mb-2">
-        <label class="block font-semibold mb-2 text-center text-[clamp(1rem,2.5vw,1.25rem)]">3. Is anyone trapped or injured?</label>
+        <label class="block font-semibold mb-2 text-[clamp(1rem,2.5vw,1.25rem)]">3. Is anyone trapped or injured?</label>
         <div class="flex justify-center">
           <div class="flex flex-wrap justify-center gap-2 sm:gap-3">
             <button
@@ -84,7 +84,7 @@
 
       <!-- Q4 -->
       <section class="mb-2">
-        <label class="block font-semibold mb-2 text-center text-[clamp(1rem,2.5vw,1.25rem)]">4. How large is the fire?</label>
+        <label class="block font-semibold mb-2 text-[clamp(1rem,2.5vw,1.25rem)]">4. How large is the fire?</label>
         <div class="flex justify-center">
           <div class="flex flex-wrap justify-center gap-2 sm:gap-3">
             <button *ngFor="let option of ['Small and contained', 'Spreading', 'Out of control']"
@@ -102,7 +102,7 @@
 
       <!-- Q5 -->
       <section class="mb-2">
-        <label class="block font-semibold mb-2 text-center text-[clamp(1rem,2.5vw,1.25rem)]">5. Is it safe for you to stay where you are?</label>
+        <label class="block font-semibold mb-2 text-[clamp(1rem,2.5vw,1.25rem)]">5. Is it safe for you to stay where you are?</label>
         <div class="flex justify-center">
           <div class="flex flex-wrap justify-center gap-2 sm:gap-3">
             <button

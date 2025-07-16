@@ -91,20 +91,20 @@
           </div>
         </div>
 
-        <!-- Submit Button -->
         <button
-          type="submit"
-          [disabled]="dataForm.invalid || isLoading || dataForm.value.dataAmount > availableAirtimeLimit"
-          class="bg-green-600 hover:bg-green-700 text-white font-extrabold py-3 px-5 rounded-xl text-sm sm:text-base w-full"
-        >
-          <span *ngIf="!isLoading">Buy Data</span>
-          <span *ngIf="isLoading">Processing...</span>
-        </button>
-
-        <!-- Low Balance Warning -->
-        <p class="text-red-600 font-semibold text-xs sm:text-sm" *ngIf="dataForm.value.dataAmount > availableAirtimeLimit">
-          You do not have enough funds available.
-        </p>
+        type="submit"
+        [disabled]="dataForm.invalid || isLoading || isAmountExceedingLimit"
+        class="bg-green-600 hover:bg-green-700 text-white font-extrabold py-3 px-5 rounded-xl text-sm sm:text-base w-full">
+        <span *ngIf="!isLoading">Buy Data</span>
+        <span *ngIf="isLoading">Processing...</span>
+      </button>
+      
+      <!-- Low-balance warning -->
+      <p *ngIf="isAmountExceedingLimit"
+         class="text-red-600 font-semibold text-xs sm:text-sm">
+        You do not have enough funds available.
+      </p>
+      
 
         <!-- Spinner -->
         <div *ngIf="isLoading" class="flex justify-center items-center mt-4">

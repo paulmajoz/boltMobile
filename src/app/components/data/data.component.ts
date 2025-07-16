@@ -113,10 +113,12 @@ export class DataComponent implements OnInit {
     });
   }
 
-  get isAmountExceedingLimit(): boolean {
-    const amount = this.dataForm.get('dataAmount')?.value;
-    return amount && amount > this.availableAirtimeLimit;
-  }
+/** True when the form amount is above the current limit */
+get isAmountExceedingLimit(): boolean {
+  const amount = Number(this.dataForm.get('dataAmount')?.value);
+  return !isNaN(amount) && amount > this.availableAirtimeLimit;
+}
+
 
   onProductChange(): void {
     const selected = this.dataForm.get('dataProduct')?.value;
@@ -126,44 +128,50 @@ export class DataComponent implements OnInit {
   }
 
   purchaseData(): void {
+    // quick check before anything else
+    if (this.isAmountExceedingLimit) {
+      this.toastr.error('Amount exceeds your available limit', 'Insufficient funds');
+      return;
+    }
+  
     this.dataForm.disable();
-    this.calculateAvailableLimit();
-
+    // no need to call calculateAvailableLimit() here – it updates asynchronously
+    // and you just passed the guard using the latest cached value.
+  
     if (this.dataForm.invalid) {
       this.dataForm.markAllAsTouched();
       this.toastr.warning('Please correct the form before submitting.', 'Invalid Input');
       this.dataForm.enable();
       return;
     }
-
+  
     const { dataProduct, dataMobileNumber, dataAmount } = this.dataForm.value;
-    const amountInCents = dataAmount * 100;
+    const amountInCents = Number(dataAmount) * 100;   // ensure number
+  
     this.isLoading = true;
-
-    this.purchaseService.purchaseData(
-      dataProduct.product_code,
-      dataMobileNumber,
-      amountInCents
-    ).subscribe({
-      next: (response) => {
-        if (response?.data.success) {
-          this.toastr.success('Data purchase successful.', 'Success');
-          this.headerRefreshService.triggerRefresh();
-          this.dataForm.reset();
-          this.fetchDataProducts();
-          this.calculateAvailableLimit();
-        }
-        if (!response?.data.success) {
-          this.toastr.error(response.data.provider_response.response_message, 'Error');
-        }
-      },
-      error: () => this.toastr.error('Data purchase failed. Please try again.', 'Error'),
-      complete: () => {
-        this.dataForm.enable();
-        this.isLoading = false;
-      }
-    });
+  
+    this.purchaseService
+        .purchaseData(dataProduct.product_code, dataMobileNumber, amountInCents)
+        .subscribe({
+          next: (res) => {
+            if (res?.data.success) {
+              this.toastr.success('Data purchase successful.', 'Success');
+              this.headerRefreshService.triggerRefresh();
+              this.dataForm.reset();
+              this.fetchDataProducts();
+              this.calculateAvailableLimit();
+            } else {
+              this.toastr.error(res?.data?.provider_response?.response_message ?? 'Unknown error', 'Error');
+            }
+          },
+          error: () => this.toastr.error('Data purchase failed. Please try again.', 'Error'),
+          complete: () => {
+            this.dataForm.enable();
+            this.isLoading = false;
+          }
+        });
   }
+  
 
   addMobile(): void {
     if (this.newMobile && !this.mobileNumbers.includes(this.newMobile)) {

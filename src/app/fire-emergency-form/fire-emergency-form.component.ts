@@ -21,9 +21,10 @@ export class FireEmergencyFormComponent {
     coordinates: '',
     firstName: '',
     lastName: '',
-    medNo: '',
+    medicalAidNumber: '',
     address: '',
-    contactNumber: ''
+    contactNumber: '',
+    contractNumber: ''
   };
 
   loading = false;
@@ -43,9 +44,10 @@ export class FireEmergencyFormComponent {
       const params = new URLSearchParams(rawQuery);
       this.form.firstName = params.get('first') || '';
       this.form.lastName = params.get('last') || '';
-      this.form.medNo = params.get('medNo') || '';
+      this.form.medicalAidNumber = params.get('medicalAidNo') || 'WRONG';
       this.form.address = params.get('address') || '';
       this.form.contactNumber = params.get('phone') || '';
+      this.form.contractNumber = params.get('contractNo') || '';
     }
     
   }
