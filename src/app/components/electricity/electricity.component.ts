@@ -8,6 +8,7 @@ import { ToastrService } from 'ngx-toastr';
 import { UserService } from '../../services/user.service';
 import { Router } from '@angular/router';
 import { HeaderRefreshService } from '../../services/header-refresh.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-electricity',
@@ -81,15 +82,19 @@ export class ElectricityComponent implements OnInit {
     this.isLoading = true;
 
     try {
-      const result = await this.purchaseService.purchaseElectricity(
-        this.meterNumber,
-        this.amountInRands * 100,
-        this.customReference
+      const result = await firstValueFrom(
+        this.purchaseService.purchaseElectricity(
+          this.meterNumber,
+          this.amountInRands * 100,
+          this.customReference
+        )
       );
 
-      const token = result?.transactionResponse?.data?.elec_data?.std_tokens?.[0]?.code;
+      // const token = result?.transactionResponse?.data?.elec_data?.std_tokens?.[0]?.code;
+      const token = result?.data?.elec_data?.std_tokens?.[0]?.code;
       this.token = token || null;
-      const meterNotFound = result?.transactionResponse?.data.provider_response?.response_message
+      // const meterNotFound = result?.transactionResponse?.data.provider_response?.response_message
+      const meterNotFound = result?.data?.provider_response?.response_message;
       if (token) {
         this.toastr.success('Token received!', 'Token Ready');
         this.headerRefreshService.triggerRefresh(); 

@@ -23,7 +23,7 @@ export class LoginComponent implements OnInit {
   employeeNumber = '';
   nationalId = '';
   errorMessage = '';
-  private userhash = '';
+  private userhash = '85CNTAV';
 
   constructor(
     private readonly apiService: ApiService,
